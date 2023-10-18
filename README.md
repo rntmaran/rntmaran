@@ -1,6 +1,6 @@
 - 👋 Hi, I’m @rntmaran
 - 👀 I’m interested in design, business, and nature
-- 🌱 I’m currently learning on vocational high school
+- 🌱 I’m currently learning at Media Production UI
 - 💞️ I’m looking to collaborate on bulid a comunity together??
 - 📫 How to reach me follow me on instgram @rntmaran
 
