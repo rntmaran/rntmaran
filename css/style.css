@@ -390,7 +390,7 @@ section.reveal.seen { opacity: 1; transform: none; }
 .cas-window { position: absolute; left: 18%; right: 18%; bottom: 10%; height: 42%; border-radius: 99px; background: #2b2122; display: flex; align-items: center; justify-content: space-between; padding: 0 6%; box-shadow: inset 0 3px 8px rgba(0,0,0,.6); }
 .reel { width: 30%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, #fbf3e6 0 22%, transparent 23%), repeating-conic-gradient(#e9dccb 0 20deg, #b9a998 20deg 60deg); animation: spin 2.2s linear infinite; animation-play-state: paused; position: relative; z-index: 1; }
 .cassette.playing .reel { animation-play-state: running; }
-.tape { position: absolute; left: 22%; right: 22%; top: 50%; height: 34%; transform: translateY(-50%); background: #4a3328; border-radius: 4px; }
+.cas-tape { position: absolute; left: 22%; right: 22%; top: 50%; height: 34%; transform: translateY(-50%); background: #4a3328; border-radius: 4px; }
 .cas-bottom { position: absolute; left: 20%; right: 20%; bottom: 0; height: 22%; background: rgba(0,0,0,.18); clip-path: polygon(8% 0, 92% 0, 100% 100%, 0 100%); display: flex; justify-content: space-around; align-items: center; }
 .cas-bottom i { width: 9px; height: 9px; border-radius: 50%; background: rgba(0,0,0,.35); }
 .deck { display: flex; gap: 1rem; margin: 1.8rem 0 1.4rem; }
