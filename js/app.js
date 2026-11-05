@@ -452,8 +452,7 @@
 
   function buildWall() {
     const rots = [-4, 3, -2, 5, -3, 2, -5, 4, -1, 3];
-    $("#wall").innerHTML = C.photos.map((p, i) => polaroid(p, `style="--r:${rots[i % rots.length]}deg" data-i="${i}"`)
-      .replace('<div class="ph">', `${i % 3 === 0 ? '<span class="tape"></span>' : ""}<div class="ph">`)).join("");
+    $("#wall").innerHTML = C.photos.map((p, i) => polaroid(p, `style="--r:${rots[i % rots.length]}deg" data-i="${i}"`)).join("");
     $("#wall").addEventListener("click", (e) => {
       const f = e.target.closest(".polaroid");
       if (f) openLightbox(C.photos[f.dataset.i]);
