@@ -384,7 +384,6 @@ section.reveal.seen { opacity: 1; transform: none; }
 .cassette::before { left: 3%; } .cassette::after { right: 3%; }
 .cas-label { position: relative; height: 68%; background: #fbf3e6; border-radius: 8px; padding: 4% 5%; overflow: hidden;
   background-image: repeating-linear-gradient(transparent 0 15px, rgba(107, 42, 58, .12) 15px 16px); }
-.cas-side { position: absolute; left: 5%; top: 6%; width: 26px; height: 26px; border-radius: 50%; background: var(--wine); color: #fff; display: grid; place-items: center; font-family: var(--sans); font-size: .8rem; }
 .cas-title { display: block; text-align: center; font-family: var(--hand); font-size: clamp(1.2rem, 4.6vw, 1.6rem); color: var(--wine); transform: rotate(-1.5deg); }
 .cas-window { position: absolute; left: 18%; right: 18%; bottom: 10%; height: 42%; border-radius: 99px; background: #2b2122; display: flex; align-items: center; justify-content: space-between; padding: 0 6%; box-shadow: inset 0 3px 8px rgba(0,0,0,.6); }
 .reel { width: 30%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, #fbf3e6 0 22%, transparent 23%), repeating-conic-gradient(#e9dccb 0 20deg, #b9a998 20deg 60deg); animation: spin 2.2s linear infinite; animation-play-state: paused; position: relative; z-index: 1; }

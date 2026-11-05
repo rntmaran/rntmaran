@@ -70,8 +70,8 @@ window.CONFIG = {
 
   /* ---------- 6. the mixtape ---------- */
   mixtape: {
-    label: "for Vin ♡ side A",
-    note: "Two songs, one person. Press play whenever you miss me — I'll be right here, on side A and every side after it. — R",
+    label: "for Vin",
+    note: "Two songs, one person. Press play whenever you miss me — I'll be right here. — R",
     tracks: [
       {
         id: "U41KPUfOSFk",
