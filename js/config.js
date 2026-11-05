@@ -14,11 +14,11 @@ window.CONFIG = {
   /* the day you started dating (YYYY-MM-DD) – powers the live counter */
   startDate: "2024-02-11",
 
-  /* ---------- music (YouTube video ids) ---------- */
+  /* ---------- music (mp3 files in assets/music/) ---------- */
   lockSong: {
-    id: "4qSjyl8JN4g",
+    src: "assets/music/stuck.mp3",
     start: 0,
-    title: "" // leave empty = use the YouTube title automatically
+    title: "LANY - Stuck"
   },
 
   /* ---------- 3. the letter ---------- */
@@ -74,15 +74,15 @@ window.CONFIG = {
     note: "Two songs, one person. Press play whenever you miss me — I'll be right here. — R",
     tracks: [
       {
-        id: "U41KPUfOSFk",
+        src: "assets/music/mirrors.mp3",
         start: 324, // 5:24
-        title: "", // empty = fetched from YouTube automatically
+        title: "Mirrors - Justin Timberlake",
         note: "skip straight to the good part — this bit is you, every single time ♡"
       },
       {
-        id: "nrpe7rCtXFM",
+        src: "assets/music/as-long-as-you-love-me.mp3",
         start: 52, // 0:52
-        title: "",
+        title: "As Long As You Love Me - Backstreet Boys",
         note: "the one I play when I miss you (which is a lot)"
       }
     ]

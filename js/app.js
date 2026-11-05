@@ -101,94 +101,78 @@
   })();
 
   /* =======================================================
-     MUSIC — one hidden YouTube player for everything
+     MUSIC — one <audio> element plays everything (mp3, no ads)
      ======================================================= */
   const pill = $("#pill");
   const cassette = $("#cassette");
+  const audio = new Audio();
+  audio.preload = "auto";
+  audio.setAttribute("playsinline", "");
   const Music = {
-    player: null, ready: false, queued: null, started: false, playing: false,
-    current: { kind: "lock", i: 0 }, titles: {},
+    started: false, playing: false, current: { kind: "lock", i: 0 },
 
+    song() { return this.current.kind === "mix" ? C.mixtape.tracks[this.current.i] : C.lockSong; },
     init() {
-      window.onYouTubeIframeAPIReady = () => {
-        const vars = { playsinline: 1, controls: 0, disablekb: 1, rel: 0, start: C.lockSong.start || 0 };
-        if (location.protocol.startsWith("http")) vars.origin = location.origin;
-        this.player = new YT.Player("yt", {
-          width: 200, height: 200, videoId: C.lockSong.id, playerVars: vars,
-          events: {
-            onReady: () => { this.ready = true; if (this.queued) { const q = this.queued; this.queued = null; q(); } },
-            onStateChange: (e) => this.onState(e.data),
-            onError: () => { $("#pillTitle").textContent = "couldn't load this song :("; }
-          }
-        });
-      };
-      const s = document.createElement("script");
-      s.src = "https://www.youtube.com/iframe_api";
-      document.head.appendChild(s);
-      // fetch pretty titles (no API key needed)
-      [C.lockSong, ...C.mixtape.tracks].forEach((t) => {
-        if (t.title) { this.titles[t.id] = t.title; return; }
-        fetch("https://noembed.com/embed?url=" + encodeURIComponent("https://www.youtube.com/watch?v=" + t.id))
-          .then((r) => r.json())
-          .then((j) => { if (j && j.title) { this.titles[t.id] = clean(j.title); renderTracks(); this.label(); } })
-          .catch(() => {});
-      });
+      audio.src = C.lockSong.src;
+      ["play", "playing", "pause", "ended"].forEach((ev) => audio.addEventListener(ev, () => this.onState(ev)));
+      audio.addEventListener("error", () => { $("#pillTitle").textContent = "couldn't load this song :("; });
+      this.label();
     },
-    run(fn) { if (this.ready) fn(); else this.queued = fn; },
+    /** play from a user tap; if the browser refuses, ask for one more tap */
+    tryPlay() {
+      const p = audio.play();
+      if (p && p.catch) p.catch(() => { pill.classList.add("nudge"); $("#pillTitle").textContent = "Tap here to play ♪"; });
+    },
     /** first tap anywhere on the lock screen */
     start() {
       if (this.started) return;
       this.started = true;
       pill.classList.add("show");
+      this.tryPlay();
+    },
+    load(song) {
+      const start = song.start || 0;
+      audio.src = song.src;
+      audio.currentTime = start;
+      // some browsers ignore currentTime until the file's metadata is in
+      if (start) audio.addEventListener("loadedmetadata", () => { if (audio.currentTime < start - 1) audio.currentTime = start; }, { once: true });
+      this.started = true;
       this.label();
-      this.run(() => this.player.playVideo());
-      setTimeout(() => { if (!this.playing) { pill.classList.add("nudge"); $("#pillTitle").textContent = "Tap here to play ♪"; } }, 3000);
+      this.tryPlay();
     },
-    load(id, start) {
-      this.run(() => this.player.loadVideoById({ videoId: id, startSeconds: start || 0 }));
-    },
-    playLock() { this.current = { kind: "lock", i: 0 }; this.load(C.lockSong.id, C.lockSong.start); this.label(); },
+    playLock() { this.current = { kind: "lock", i: 0 }; this.load(C.lockSong); },
     playTrack(i) {
       const n = C.mixtape.tracks.length;
       i = ((i % n) + n) % n;
       this.current = { kind: "mix", i };
-      const t = C.mixtape.tracks[i];
-      this.load(t.id, t.start);
       pill.classList.add("show");
-      this.label(); renderTracks();
+      this.load(C.mixtape.tracks[i]);
+      renderTracks();
     },
     toggle() {
-      if (!this.ready) { this.start(); return; }
-      if (this.playing) this.player.pauseVideo(); else this.player.playVideo();
+      this.started = true;
+      pill.classList.add("show");
+      if (audio.paused) this.tryPlay(); else audio.pause();
     },
-    seek(d) { if (this.ready) this.player.seekTo(Math.max(0, this.player.getCurrentTime() + d), true); },
-    currentId() { return this.current.kind === "mix" ? C.mixtape.tracks[this.current.i].id : C.lockSong.id; },
+    seek(d) { audio.currentTime = Math.max(0, Math.min((audio.duration || 1e9) - 0.5, audio.currentTime + d)); },
     label() {
-      const id = this.currentId();
-      let title = this.titles[id];
-      if (!title && this.ready) { const d = this.player.getVideoData && this.player.getVideoData(); if (d && d.title) title = this.titles[id] = clean(d.title); }
       $("#pillLabel").textContent = this.current.kind === "mix" ? `mixtape · track ${this.current.i + 1}` : "our song";
-      if (title && (this.playing || !pill.classList.contains("nudge"))) $("#pillTitle").textContent = title;
-      else if (!title && this.playing) $("#pillTitle").textContent = "our song ♡";
+      if (this.playing || !pill.classList.contains("nudge")) $("#pillTitle").textContent = this.song().title || "our song ♡";
     },
-    onState(s) {
-      const Y = window.YT.PlayerState;
-      this.playing = s === Y.PLAYING;
-      if (s === Y.PLAYING) pill.classList.remove("nudge");
+    onState(ev) {
+      this.playing = !audio.paused && ev !== "ended";
+      if (this.playing) pill.classList.remove("nudge");
       pill.classList.toggle("playing", this.playing);
       cassette.classList.toggle("playing", this.playing && this.current.kind === "mix");
       $("#mixPlay").textContent = this.playing && this.current.kind === "mix" ? "❚❚" : "▶";
       renderTracks();
       this.label();
-      if (s === Y.ENDED) {
-        if (this.current.kind === "lock") { this.player.seekTo(C.lockSong.start || 0, true); this.player.playVideo(); }
+      if (ev === "ended") {
+        if (this.current.kind === "lock") { audio.currentTime = C.lockSong.start || 0; this.tryPlay(); }
         else if (this.current.i < C.mixtape.tracks.length - 1) this.playTrack(this.current.i + 1);
       }
     }
   };
-  function clean(t) {
-    return t.replace(/\s*[([][^)\]]*(official|lyric|audio|video|mv|visuali[sz]er|music)[^)\]]*[)\]]/gi, "").trim();
-  }
   $("#pillPlay").addEventListener("click", () => Music.toggle());
   $("#pillMeta").addEventListener("click", () => Music.toggle());
   $("#pillRew").addEventListener("click", () => Music.seek(-10));
@@ -552,7 +536,7 @@
       const on = Music.current.kind === "mix" && Music.current.i === i;
       return `<li class="track ${on ? "on" : ""} ${on && Music.playing ? "playing" : ""}" data-i="${i}">
         <span class="track-num">${i + 1}</span>
-        <span class="track-title">${esc(Music.titles[t.id] || `track ${i + 1}`)}<span class="eq"><i></i><i></i><i></i></span></span>
+        <span class="track-title">${esc(t.title || `track ${i + 1}`)}<span class="eq"><i></i><i></i><i></i></span></span>
         <span class="track-time">${t.start ? "from<br>" + fmtTime(t.start) : ""}</span>
         <span class="track-note">${esc(t.note || "")}</span>
       </li>`;
