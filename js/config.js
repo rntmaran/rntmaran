@@ -105,7 +105,7 @@ window.CONFIG = {
     coupon: {
       title: "Steam Wallet Voucher",
       amount: "", // e.g. "Rp 200.000" — empty shows "surprise amount ♡"
-      fine: "No expiry · Non-transferable · Valid only for my favourite gamer",
+      fine: "No expiry · 1 time use only · Non-transferable · Valid only for my favourite gamer",
       redeem: "Screenshot this & show it to me to redeem ♡",
       serial: "NKI-1000-ILY"
     }
