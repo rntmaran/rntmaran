@@ -450,7 +450,7 @@
       const diff = Math.max(0, Date.now() - start);
       const days = Math.floor(diff / 864e5);
       const dayNo = days + 1;
-      $("#cDays").textContent = days.toLocaleString("en-US");
+      $("#cDays").textContent = dayNo; // day 1 = the day we started
       $("#cHours").textContent = Math.floor(diff / 36e5) % 24;
       $("#cMins").textContent = Math.floor(diff / 6e4) % 60;
       $("#cSecs").textContent = Math.floor(diff / 1e3) % 60;
@@ -460,8 +460,8 @@
       $("#countNote").textContent =
         left === 0 ? "today is our 1000th day ♡" :
         left > 0 ? `${left} more sleep${left === 1 ? "" : "s"} until day 1000 ♡` :
-        `day ${dayNo.toLocaleString("en-US")} — and still counting ♡`;
-      $("#finaleDay").textContent = `today is day ${dayNo.toLocaleString("en-US")} of us`;
+        `day ${dayNo} — and still counting ♡`;
+      $("#finaleDay").textContent = `today is day ${dayNo} of us`;
     };
     tick();
     setInterval(tick, 1000);
