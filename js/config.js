@@ -48,13 +48,13 @@ window.CONFIG = {
   /* ---------- photos (tap one to open it big) ---------- */
   photos: [
     { src: "assets/photos/p1.jpg", caption: "mirror, mirror… that's my favourite person" },
-    { src: "assets/photos/p3.jpg", caption: "us, all dressed up ✨" },
+    { src: "assets/photos/p3.jpg", caption: "us, all dressed up" },
     { src: "assets/photos/p4.jpg", caption: "shot on film, kept forever" },
-    { src: "assets/photos/p2.jpg", caption: "late nights & soft smiles" },
+    { src: "assets/photos/p2.jpg", caption: "back together again 11.2.24" },
     { video: "assets/video/memory.mp4", caption: "22 · 06 · 2024 ♡" },
     { src: "assets/photos/p7.jpg", caption: "matching in black" },
     { src: "assets/photos/p5.jpg", caption: "car rides & stolen kisses" },
-    { src: "assets/photos/p6.jpg", caption: "my favourite view" }
+    { src: "assets/photos/p8.jpg", caption: "first date & meet after long time" }
   ],
 
   /* ---------- 5. the certificate ---------- */

@@ -235,7 +235,7 @@ body::before {
 .addr p { margin: .1rem 0; font-family: var(--script); font-size: clamp(1.05rem, 3.6vw, 1.3rem); color: #b06d58; }
 .addr small { font-family: var(--sans); font-size: .55rem; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); display: inline-block; width: 3.2em; }
 .stamp { flex: none; width: 64px; padding: 4px; background: #efe0c6; transform: rotate(4deg);
-  -webkit-mask: radial-gradient(circle 3px, #0000 98%, #000) -4px -4px / 8px 8px; mask: radial-gradient(circle 3px, #0000 98%, #000) -4px -4px / 8px 8px; }
+  -webkit-mask: radial-gradient(farthest-side, #000 97%, #0000) 0 0 / 8px 8px round, linear-gradient(#000 0 0) content-box; mask: radial-gradient(farthest-side, #000 97%, #0000) 0 0 / 8px 8px round, linear-gradient(#000 0 0) content-box; }
 .stamp-in { background: #fff8ee; padding: 4px; display: grid; gap: 2px; }
 .stamp-in img { width: 100%; aspect-ratio: 1; object-fit: cover; filter: sepia(.25) saturate(1.1); }
 .stamp-in small { font-family: var(--sans); font-size: .42rem; letter-spacing: .14em; text-transform: uppercase; color: #b06d58; text-align: center; }
@@ -464,3 +464,25 @@ section.reveal.seen { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .2s !important; }
 }
+
+/* back / next */
+.step-nav {
+  position: fixed; left: 50%; bottom: max(14px, env(safe-area-inset-bottom)); z-index: 55;
+  transform: translate(-50%, 160%);
+  display: flex; align-items: center; gap: .3rem; padding: .3rem;
+  background: rgba(253, 250, 241, .92);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-radius: 999px;
+  box-shadow: 0 10px 30px -12px rgba(60, 40, 30, .45), 0 0 0 1px rgba(60, 40, 30, .06);
+  transition: transform .8s var(--ease);
+}
+body.has-nav .step-nav { transform: translate(-50%, 0); }
+.step-nav button {
+  border: 0; border-radius: 999px; padding: .6rem 1.1rem;
+  font-family: var(--sans); font-size: .82rem; letter-spacing: .03em;
+  background: transparent; color: var(--wine); white-space: nowrap; transition: background .2s, opacity .2s;
+}
+.step-nav #navNext { background: var(--wine); color: #fbeff0; }
+.step-nav button:disabled { opacity: .3; cursor: default; }
+.step-nav span { font-family: var(--sans); font-size: .62rem; letter-spacing: .14em; color: var(--muted); min-width: 3.2em; text-align: center; }
+body.has-nav .finale, body.has-nav .scene-letter { padding-bottom: 6rem; }

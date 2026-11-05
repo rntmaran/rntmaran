@@ -278,7 +278,7 @@
       f.style.animation = "none";
     });
     await wait(1700);
-    show("scene-envelope");
+    goEnvelope();
   }
   $("#keypad").addEventListener("click", (e) => {
     const b = e.target.closest("button");
@@ -296,7 +296,14 @@
      2 · ENVELOPE
      ======================================================= */
   const env = $("#envelope");
-  env.addEventListener("click", async () => {
+  function goEnvelope() {
+    env.classList.remove("open", "zoom");
+    $("#envTip").style.opacity = "";
+    document.body.classList.add("intro");
+    show("scene-envelope");
+    setStep("envelope");
+  }
+  async function openEnvelope() {
     if (env.classList.contains("open")) return;
     Music.start();
     env.classList.add("open");
@@ -304,9 +311,9 @@
     await wait(reduced ? 300 : 2500);
     env.classList.add("zoom");
     await wait(700);
-    show("scene-letter");
-    startLetter();
-  });
+    goLetter(false);
+  }
+  env.addEventListener("click", openEnvelope);
 
   /* =======================================================
      3 · LETTER
@@ -341,27 +348,37 @@
     }
     if (run === letterRun) letterScene.classList.add("letter-done");
   }
+  function goLetter(done) {
+    document.body.classList.add("intro");
+    show("scene-letter");
+    setStep("letter");
+    if (done) { finishLetter(); letterScene.scrollTop = 0; }
+    else { letterScene.classList.remove("letter-done"); $$(".ln", letterScene).forEach((el) => el.classList.remove("in")); startLetter(); }
+  }
   $("#skipLetter").addEventListener("click", finishLetter);
-  $("#toWorld").addEventListener("click", () => {
-    if (letterScene.classList.contains("reread")) {
-      letterScene.classList.remove("is-active", "reread");
-      document.body.classList.remove("intro");
-      return;
-    }
-    enterWorld();
-  });
+  $("#toWorld").addEventListener("click", () => enterWorld("hero"));
 
   /* =======================================================
      4+ · THE WORLD
      ======================================================= */
   let worldBuilt = false;
-  function enterWorld() {
+  function enterWorld(id = "hero", fx = true) {
     show("none");
     document.body.classList.remove("intro");
     document.body.classList.add("world-on");
-    scrollTo(0, 0);
     if (!worldBuilt) { worldBuilt = true; buildWorld(); }
-    setTimeout(() => FX.rain(50), 600);
+    jumpTo(id, false);
+    setStep(id);
+    if (fx) setTimeout(() => FX.rain(50), 600);
+  }
+  function jumpTo(id, smooth) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.add("seen");
+    const y = () => (id === "hero" ? 0 : Math.max(0, el.getBoundingClientRect().top + scrollY - 70));
+    scrollTo({ top: y(), behavior: smooth ? "smooth" : "instant" });
+    // layout can shift while images/fonts settle, so re-align once more
+    if (!smooth) setTimeout(() => scrollTo({ top: y(), behavior: "instant" }), 400);
   }
 
   const ICONS = {
@@ -601,14 +618,57 @@
   }
 
   /* ---------- finale ---------- */
-  $("#rereadLetter").addEventListener("click", () => {
-    finishLetter();
-    letterScene.classList.add("is-active", "reread");
-    letterScene.scrollTop = 0;
-    document.body.classList.add("intro");
-    $("#toWorld").innerHTML = "back to our little world&nbsp; ♡";
+  $("#rereadLetter").addEventListener("click", () => goLetter(true));
+  $("#restart").addEventListener("click", () => {
+    store.set("step", "");
+    scrollTo({ top: 0, behavior: "instant" });
+    location.reload();
   });
-  $("#restart").addEventListener("click", () => { scrollTo(0, 0); location.reload(); });
+
+  /* =======================================================
+     BACK / NEXT  +  remember where he was
+     ======================================================= */
+  const STEPS = ["envelope", "letter", "hero", "counter", "gallery", "certSection", "mixtape", "riddle", "finale"];
+  const WORLD = STEPS.slice(2);
+  let step = null;
+  function setStep(id) {
+    if (step === id) return;
+    step = id;
+    store.set("step", id);
+    const i = STEPS.indexOf(id);
+    document.body.classList.add("has-nav");
+    $("#navBack").disabled = i <= 0;
+    $("#navNext").disabled = i >= STEPS.length - 1;
+    $("#navCount").textContent = `${i + 1} / ${STEPS.length}`;
+  }
+  function go(dir) {
+    const i = STEPS.indexOf(step);
+    const id = STEPS[i + dir];
+    if (!id) return;
+    if (id === "envelope") goEnvelope();
+    else if (id === "letter") {
+      if (step === "envelope" && dir > 0) openEnvelope();
+      else goLetter(true);
+    } else if (step === "letter" || !document.body.classList.contains("world-on")) enterWorld(id, step === "letter");
+    else { setStep(id); jumpTo(id, true); }
+  }
+  $("#navBack").addEventListener("click", () => go(-1));
+  $("#navNext").addEventListener("click", () => go(1));
+  // keep the saved step in sync while he scrolls through the world
+  let scrollT = 0;
+  addEventListener("scroll", () => {
+    if (!document.body.classList.contains("world-on") || document.body.classList.contains("intro")) return;
+    clearTimeout(scrollT);
+    scrollT = setTimeout(() => {
+      let cur = "hero";
+      for (const id of WORLD) {
+        const el = document.getElementById(id);
+        if (el && el.getBoundingClientRect().top < innerHeight * 0.45) cur = id;
+      }
+      if (innerHeight + scrollY >= document.documentElement.scrollHeight - 4) cur = "finale";
+      setStep(cur);
+    }, 150);
+  }, { passive: true });
 
   function buildWorld() {
     buildFloaters();
@@ -625,6 +685,15 @@
   }
 
   Music.init();
-  // handy for previewing: add #world to the url to jump straight in
-  if (location.hash === "#world") { pill.classList.add("show"); Music.started = true; enterWorld(); }
+  // came back / refreshed? pick up exactly where he left off
+  const saved = location.hash === "#world" ? "hero" : store.get("step");
+  if (saved && STEPS.includes(saved)) {
+    unlocked = true;
+    pill.classList.add("show", "nudge");
+    $("#pillTitle").textContent = "Tap here to play ♪";
+    addEventListener("pointerdown", () => Music.start(), { once: true });
+    if (saved === "envelope") goEnvelope();
+    else if (saved === "letter") goLetter(true);
+    else enterWorld(saved, false);
+  }
 })();
