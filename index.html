@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>for Vin ♡ 1000 days</title>
+  <meta name="description" content="a little secret, only for you." />
+  <meta name="theme-color" content="#f4ecdc" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💌</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Dancing+Script:wght@500;700&family=Jost:wght@400;500&family=Lora:ital@0;1&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="intro">
+
+  <!-- shared svg filters -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <filter id="wc"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="5"/></filter>
+  </svg>
+
+  <!-- hidden youtube player -->
+  <div id="yt-wrap" aria-hidden="true"><div id="yt"></div></div>
+
+  <!-- ♪ music pill -->
+  <div class="pill" id="pill" aria-label="music player">
+    <div class="pill-disc" id="pillDisc"><span></span></div>
+    <button class="pill-meta" id="pillMeta" type="button">
+      <small id="pillLabel">our song</small>
+      <span id="pillTitle">Tap here to play</span>
+    </button>
+    <button class="pill-btn" id="pillRew" type="button" aria-label="back 10 seconds">
+      <svg viewBox="0 0 24 24"><path d="M11 6 4 12l7 6V6Zm9 0-7 6 7 6V6Z"/></svg><i>10</i>
+    </button>
+    <button class="pill-play" id="pillPlay" type="button" aria-label="play / pause">
+      <svg class="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      <svg class="i-pause" viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+    </button>
+    <button class="pill-btn" id="pillFwd" type="button" aria-label="forward 10 seconds">
+      <svg viewBox="0 0 24 24"><path d="M13 6l7 6-7 6V6ZM4 6l7 6-7 6V6Z"/></svg><i>10</i>
+    </button>
+  </div>
+
+  <!-- ================= 1 · LOCK ================= -->
+  <section class="scene scene-lock is-active" id="scene-lock">
+    <div class="flower-field" id="flowerField" aria-hidden="true"></div>
+    <div class="lock-card">
+      <div class="padlock" id="padlock" aria-hidden="true">
+        <svg viewBox="0 0 64 80">
+          <path class="shackle" d="M18 36V24a14 14 0 0 1 28 0v12" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/>
+          <rect x="9" y="34" width="46" height="40" rx="9" fill="none" stroke="currentColor" stroke-width="4.5"/>
+          <circle cx="32" cy="51" r="4.5" fill="currentColor"/>
+          <path d="M32 54v8" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h1 class="lock-title">Welcome, <span id="lockName"></span></h1>
+      <p class="lock-sub">a little secret…</p>
+      <div class="dots" id="dots"><i></i><i></i><i></i><i></i></div>
+      <p class="lock-hint" id="lockHint"></p>
+      <div class="keypad" id="keypad">
+        <button type="button">1</button><button type="button">2</button><button type="button">3</button>
+        <button type="button">4</button><button type="button">5</button><button type="button">6</button>
+        <button type="button">7</button><button type="button">8</button><button type="button">9</button>
+        <span></span><button type="button">0</button>
+        <button type="button" data-k="back" aria-label="delete">
+          <svg viewBox="0 0 24 24"><path d="M21 6H8l-5 6 5 6h13z M11 9l6 6 M17 9l-6 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 2 · ENVELOPE ================= -->
+  <section class="scene scene-envelope" id="scene-envelope">
+    <div class="env-stage">
+      <button class="envelope" id="envelope" type="button" aria-label="open the envelope">
+        <span class="env-back"></span>
+        <span class="env-letter">
+          <span class="env-letter-lines"></span>
+          <span class="env-letter-flower">❀</span>
+        </span>
+        <span class="env-pocket"></span>
+        <span class="env-flap"></span>
+        <span class="env-seal"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></span>
+      </button>
+      <p class="env-tip" id="envTip">for you — tap to open</p>
+    </div>
+  </section>
+
+  <!-- ================= 3 · LETTER ================= -->
+  <section class="scene scene-letter" id="scene-letter">
+    <div class="letter-wrap">
+      <div class="clip" aria-hidden="true">
+        <svg viewBox="0 0 30 80"><path d="M10 70V16a6 6 0 0 1 12 0v52a9 9 0 0 1-18 0V22" fill="none" stroke="#c9a14f" stroke-width="3" stroke-linecap="round"/></svg>
+      </div>
+      <div class="letter-shadow">
+        <article class="letter">
+          <div class="letter-in">
+            <header class="letter-head">
+              <div class="addr">
+                <p><small>to:</small> <span id="letterTo"></span></p>
+                <p><small>from:</small> <span id="letterFrom"></span></p>
+              </div>
+              <div class="stamp" aria-hidden="true">
+                <div class="stamp-in"><img src="assets/photos/p6.jpg" alt="" /><small>1000 days</small></div>
+              </div>
+            </header>
+            <div class="ruled" id="letterBody"></div>
+            <p class="signoff" id="letterSign"></p>
+            <aside class="lyrics" id="lyrics">
+              <span class="lyrics-note">♪</span>
+              <div id="lyricsLines"></div>
+              <small id="lyricsSong"></small>
+            </aside>
+          </div>
+        </article>
+      </div>
+      <div class="letter-actions">
+        <button class="ghost-btn" id="skipLetter" type="button">show the whole letter</button>
+        <button class="solid-btn" id="toWorld" type="button">there's more for you&nbsp; ♡</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 4+ · THE LITTLE WORLD ================= -->
+  <main class="world" id="world">
+    <div class="floaters" id="floaters" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <span class="brand">1000 days.</span>
+      <span class="topnote"><i></i> a keepsake for my favourite person</span>
+    </header>
+
+    <!-- hero -->
+    <section class="hero" id="hero">
+      <p class="kicker">ILY <span class="js-to"></span> · this is only for you</p>
+      <h2 class="hero-title">You have no idea how much I love you <span class="lt">&lt;3</span></h2>
+      <p class="hero-sub">So I made you a little world.<br />Every piece of it says you.</p>
+      <div class="stack" id="stack" title="tap me"></div>
+      <p class="stack-tip">tap the photos ↺</p>
+      <a class="solid-btn" href="#counter">Unwrap your surprise&nbsp; ↓</a>
+      <p class="madeby">Made with love, by <span class="js-from"></span></p>
+    </section>
+
+    <!-- counter -->
+    <section class="counter reveal" id="counter">
+      <p class="eyebrow">we've been us for</p>
+      <div class="count-grid">
+        <div><b id="cDays">0</b><span>days</span></div>
+        <div><b id="cHours">0</b><span>hours</span></div>
+        <div><b id="cMins">0</b><span>minutes</span></div>
+        <div><b id="cSecs">0</b><span>seconds</span></div>
+      </div>
+      <p class="count-note" id="countNote"></p>
+      <ul class="count-facts">
+        <li><b id="fHours"></b> hours of choosing each other</li>
+        <li><b id="fBeats"></b> of my heartbeats (approx.) — all yours</li>
+        <li><b>∞</b> times I'd do it all again</li>
+      </ul>
+    </section>
+
+    <!-- polaroids -->
+    <section class="gallery reveal" id="gallery">
+      <p class="eyebrow">little pieces of us</p>
+      <h3 class="section-title">our wall of favourites</h3>
+      <div class="wall" id="wall"></div>
+    </section>
+
+    <!-- certificate -->
+    <section class="cert-section reveal" id="certSection">
+      <p class="eyebrow">official business</p>
+      <div class="cert-scroll">
+        <div class="cert" id="cert">
+          <div class="cert-frame">
+            <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+            <p class="cert-kicker" id="certKicker"></p>
+            <h3 class="cert-title" id="certTitle"></h3>
+            <p class="cert-sub" id="certSub"></p>
+            <div class="cert-orn">— ❦ —</div>
+            <p class="cert-lead" id="certLead"></p>
+            <p class="cert-name js-to"></p>
+            <p class="cert-line" id="certLine"></p>
+            <div class="cert-foot">
+              <div class="cert-col"><p class="cert-date" id="certDate"></p><small>made official on</small></div>
+              <div class="seal" aria-hidden="true">
+                <svg viewBox="0 0 120 120" id="sealSvg"></svg>
+              </div>
+              <div class="cert-col"><p class="cert-sign js-from"></p><small>signed with all my love</small></div>
+            </div>
+            <p class="cert-footer" id="certFooter"></p>
+          </div>
+        </div>
+      </div>
+      <button class="ghost-btn" id="saveCert" type="button">⤓&nbsp; Save your certificate</button>
+    </section>
+
+    <!-- mixtape -->
+    <section class="mixtape reveal" id="mixtape">
+      <p class="eyebrow">press play</p>
+      <h3 class="section-title">a mixtape, just for you</h3>
+      <div class="cassette" id="cassette">
+        <div class="cas-label">
+          <span class="cas-side">A</span>
+          <span class="cas-title" id="casLabel"></span>
+          <span class="cas-lines"></span>
+          <div class="cas-window">
+            <span class="reel"></span><span class="tape"></span><span class="reel"></span>
+          </div>
+        </div>
+        <div class="cas-bottom"><i></i><i></i><i></i><i></i></div>
+      </div>
+      <div class="deck">
+        <button type="button" id="mixPrev" aria-label="previous track">⏮</button>
+        <button type="button" id="mixPlay" class="deck-play" aria-label="play mixtape">▶</button>
+        <button type="button" id="mixNext" aria-label="next track">⏭</button>
+      </div>
+      <ol class="tracks" id="tracks"></ol>
+      <div class="liner">
+        <p id="linerNote"></p>
+      </div>
+    </section>
+
+    <!-- riddle -->
+    <section class="riddle-section reveal" id="riddle">
+      <p class="eyebrow">one more thing…</p>
+      <h3 class="section-title">your next gift is hiding behind a riddle</h3>
+      <div class="riddle-card" id="riddleCard">
+        <div class="riddle-q" id="riddleQ"></div>
+        <form class="riddle-form" id="riddleForm" autocomplete="off">
+          <input id="riddleInput" type="text" placeholder="type your answer…" aria-label="your answer" />
+          <button class="solid-btn" type="submit">unlock</button>
+        </form>
+        <p class="riddle-hint" id="riddleHint"></p>
+      </div>
+      <div class="coupon-zone" id="couponZone">
+        <div class="coupon" id="coupon">
+          <div class="cp-main">
+            <small class="cp-kicker">gift coupon · for <span class="js-nick"></span></small>
+            <p class="cp-title" id="cpTitle"></p>
+            <p class="cp-amount" id="cpAmount"></p>
+            <p class="cp-fine" id="cpFine"></p>
+          </div>
+          <div class="cp-stub">
+            <small>admit one</small>
+            <b>♡</b>
+            <small id="cpSerial"></small>
+          </div>
+        </div>
+        <p class="cp-redeem" id="cpRedeem"></p>
+        <button class="ghost-btn" id="saveCoupon" type="button">⤓&nbsp; Save your coupon</button>
+      </div>
+    </section>
+
+    <!-- finale -->
+    <section class="finale reveal" id="finale">
+      <p class="finale-script">here's to the next 1000 days</p>
+      <p class="finale-sub">and the thousand after that, and the thousand after that…</p>
+      <p class="finale-day" id="finaleDay"></p>
+      <div class="finale-actions">
+        <button class="ghost-btn" id="rereadLetter" type="button">read the letter again</button>
+        <button class="ghost-btn" id="restart" type="button">start from the very beginning ↺</button>
+      </div>
+      <p class="madeby">forever yours, <span class="js-from"></span> ♡</p>
+    </section>
+  </main>
+
+  <!-- lightbox -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="photo">
+    <figure class="lb-polaroid" id="lbFig"></figure>
+    <p class="lb-tip">tap anywhere to close</p>
+  </div>
+
+  <canvas id="fx" aria-hidden="true"></canvas>
+
+  <script src="js/config.js"></script>
+  <script src="js/vendor/html2canvas.min.js" defer></script>
+  <script src="js/app.js" defer></script>
+</body>
+</html>
