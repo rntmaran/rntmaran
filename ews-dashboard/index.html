@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANCANG — Prototipe Dashboard Early Warning System PR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4f5f9;
+    --surface:#ffffff;
+    --surface-2:#edeff5;
+    --border:#dde0ea;
+    --text:#191c2b;
+    --text-2:#565b70;
+    --text-muted:#8b90a6;
+    --accent:#2a78d6;
+    --accent-soft:#e8f0fc;
+    --accent-ink:#1c4e94;
+    --good:#0ca30c;
+    --good-ink:#157a20;
+    --good-soft:#e3f6e3;
+    --warn:#fab219;
+    --warn-ink:#8a5a00;
+    --warn-soft:#fdf1d8;
+    --crit:#d03b3b;
+    --crit-ink:#b23030;
+    --crit-soft:#fbe6e3;
+    --shadow: 0 1px 2px rgba(20,22,45,0.04), 0 6px 20px rgba(20,22,45,0.06);
+    --font-ui: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#12131c;
+      --surface:#191b28;
+      --surface-2:#20222f;
+      --border:#2c2f42;
+      --text:#eceefb;
+      --text-2:#b1b4cc;
+      --text-muted:#767ba0;
+      --accent:#3987e5;
+      --accent-soft:#1c2a42;
+      --accent-ink:#9cc0f5;
+      --good:#0ca30c;
+      --good-ink:#3ecf5c;
+      --good-soft:#173321;
+      --warn:#fab219;
+      --warn-ink:#fab219;
+      --warn-soft:#3a2c11;
+      --crit:#d03b3b;
+      --crit-ink:#f0776a;
+      --crit-soft:#3d1e1a;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#12131c;
+    --surface:#191b28;
+    --surface-2:#20222f;
+    --border:#2c2f42;
+    --text:#eceefb;
+    --text-2:#b1b4cc;
+    --text-muted:#767ba0;
+    --accent:#3987e5;
+    --accent-soft:#1c2a42;
+    --accent-ink:#9cc0f5;
+    --good:#0ca30c;
+    --good-ink:#3ecf5c;
+    --good-soft:#173321;
+    --warn:#fab219;
+    --warn-ink:#fab219;
+    --warn-soft:#3a2c11;
+    --crit:#d03b3b;
+    --crit-ink:#f0776a;
+    --crit-soft:#3d1e1a;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-ui);
+    font-size:14px;
+    line-height:1.5;
+  }
+  ::selection{background:var(--accent-soft);color:var(--accent-ink);}
+  h1,h2,h3,h4{font-family:var(--font-ui);margin:0;text-wrap:balance;}
+  p{margin:0;}
+  .mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums;}
+  .app{display:grid;grid-template-columns:232px 1fr;min-height:100vh;}
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    background:var(--surface);
+    border-right:1px solid var(--border);
+    padding:20px 14px;
+    display:flex;flex-direction:column;
+    gap:22px;
+    position:sticky;top:0;height:100vh;
+    overflow-y:auto;
+  }
+  .brand{display:flex;align-items:center;gap:10px;padding:2px 6px;}
+  .brand-mark{
+    width:32px;height:32px;border-radius:9px;
+    background:linear-gradient(155deg,var(--accent),var(--accent-ink));
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-family:var(--font-mono);font-weight:600;font-size:13px;
+    flex-shrink:0;
+  }
+  .brand-text .name{font-weight:700;font-size:15px;letter-spacing:0.02em;}
+  .brand-text .tag{font-size:10.5px;color:var(--text-muted);letter-spacing:0.03em;}
+
+  .nav{display:flex;flex-direction:column;gap:2px;}
+  .nav-label{font-size:10.5px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);padding:10px 10px 4px;}
+  .nav-item{
+    display:flex;align-items:center;gap:10px;
+    padding:8px 10px;border-radius:8px;cursor:pointer;
+    color:var(--text-2);font-size:13px;font-weight:500;
+    border:1px solid transparent;
+    background:none;text-align:left;width:100%;font-family:var(--font-ui);
+  }
+  .nav-item:hover{background:var(--surface-2);color:var(--text);}
+  .nav-item.active{background:var(--accent-soft);color:var(--accent-ink);font-weight:600;}
+  .nav-item .dot{width:6px;height:6px;border-radius:50%;background:var(--text-muted);flex-shrink:0;}
+  .nav-item.active .dot{background:var(--accent);}
+
+  .sidebar-foot{margin-top:auto;padding:10px;border-top:1px solid var(--border);font-size:11px;color:var(--text-muted);line-height:1.6;}
+  .sidebar-foot b{color:var(--text-2);}
+
+  /* ---------- Main ---------- */
+  .main{padding:22px 28px 60px;max-width:1180px;}
+  .topbar{margin-bottom:14px;}
+  .topbar h1{font-size:19px;font-weight:700;}
+  .topbar .sub{font-size:12.5px;color:var(--text-muted);margin-top:3px;}
+
+  /* ---------- Query bar ---------- */
+  .query-bar{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);
+    margin-bottom:14px;
+  }
+  .query-bar input[type="text"]{
+    flex:1 1 240px;min-width:200px;
+    border:1px solid var(--border);border-radius:8px;
+    padding:8px 11px;font-family:var(--font-ui);font-size:13px;
+    background:var(--surface-2);color:var(--text);outline:none;
+  }
+  .query-bar input[type="text"]:focus{border-color:var(--accent);}
+  .platform-chips{display:flex;gap:6px;flex-wrap:wrap;}
+  .chip-toggle{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:7px 11px;border-radius:999px;
+    border:1px solid var(--border);background:var(--surface-2);
+    font-size:11.5px;font-weight:600;color:var(--text-2);
+    cursor:pointer;user-select:none;font-family:var(--font-ui);
+  }
+  .chip-toggle .sw{width:7px;height:7px;border-radius:50%;background:var(--text-muted);flex-shrink:0;}
+  .chip-toggle.on{background:var(--accent-soft);color:var(--accent-ink);border-color:var(--accent);}
+  .chip-toggle.on .sw{background:var(--accent);}
+  .live-pill{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:var(--good-ink);white-space:nowrap;}
+  .live-pill .pulse{width:8px;height:8px;border-radius:50%;background:var(--good);animation:blink 1.3s ease-in-out infinite;}
+  .live-pill.paused{color:var(--text-muted);}
+  .live-pill.paused .pulse{background:var(--text-muted);animation:none;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+  @media (prefers-reduced-motion: reduce){ .live-pill .pulse{animation:none;} }
+  .query-hint{width:100%;font-size:11px;color:var(--text-muted);}
+
+  .banner{
+    display:flex;gap:10px;align-items:flex-start;
+    background:var(--accent-soft);border:1px solid var(--accent);
+    border-radius:10px;padding:11px 14px;margin-bottom:20px;
+    font-size:12.5px;color:var(--accent-ink);
+  }
+  .banner svg{flex-shrink:0;margin-top:1px;}
+
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  .grid{display:grid;gap:14px;}
+  .kpi-row{grid-template-columns:repeat(5,1fr);}
+  @media(max-width:1050px){.kpi-row{grid-template-columns:repeat(2,1fr);}}
+
+  .card{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:12px;padding:16px 18px;box-shadow:var(--shadow);
+  }
+  .card-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;}
+  .card-h h3{font-size:13.5px;font-weight:600;}
+  .card-h .hint{font-size:11px;color:var(--text-muted);}
+
+  .kpi{display:flex;flex-direction:column;gap:6px;}
+  .kpi .label{font-size:11.5px;color:var(--text-muted);font-weight:500;}
+  .kpi .value{font-size:24px;font-weight:700;font-family:var(--font-mono);}
+  .kpi .delta{font-size:11.5px;font-weight:600;display:flex;align-items:center;gap:4px;}
+  .kpi .delta.up{color:var(--crit-ink);}
+  .kpi .delta.down{color:var(--good-ink);}
+  .kpi .foot{font-size:10.5px;color:var(--text-muted);margin-top:2px;}
+
+  .badge{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:4px 10px;border-radius:999px;font-size:11.5px;font-weight:700;
+    letter-spacing:0.02em;
+  }
+  .badge .dot{width:7px;height:7px;border-radius:50%;}
+  .badge.normal{background:var(--good-soft);color:var(--good-ink);}
+  .badge.normal .dot{background:var(--good);}
+  .badge.waspada{background:var(--warn-soft);color:var(--warn-ink);}
+  .badge.waspada .dot{background:var(--warn);}
+  .badge.kritis{background:var(--crit-soft);color:var(--crit-ink);}
+  .badge.kritis .dot{background:var(--crit);}
+
+  .two-col{grid-template-columns:1.65fr 1fr;align-items:start;}
+  @media(max-width:900px){.two-col{grid-template-columns:1fr;}}
+
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:11.5px;color:var(--text-2);margin-top:8px;}
+  .legend .item{display:flex;align-items:center;gap:6px;}
+  .legend .sw{width:10px;height:10px;border-radius:3px;}
+
+  .indicator-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);}
+  .indicator-row:last-child{border-bottom:none;}
+  .indicator-row .meta{width:190px;flex-shrink:0;}
+  .indicator-row .meta .t{font-size:12.5px;font-weight:600;}
+  .indicator-row .meta .w{font-size:10.5px;color:var(--text-muted);}
+  .bartrack{flex:1;height:9px;border-radius:5px;background:var(--surface-2);overflow:hidden;}
+  .barfill{height:100%;border-radius:5px;transition:width 0.4s ease;}
+  .indicator-row .val{width:44px;text-align:right;font-family:var(--font-mono);font-weight:600;font-size:12.5px;flex-shrink:0;}
+
+  .section-title{font-size:12px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);font-weight:600;margin:26px 0 10px;}
+  .section-title:first-child{margin-top:0;}
+
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);font-weight:600;padding:0 10px 8px;}
+  td{padding:10px;border-top:1px solid var(--border);vertical-align:top;}
+  tr td:first-child, th:first-child{padding-left:0;}
+
+  .pill{display:inline-block;padding:2px 8px;border-radius:6px;font-size:10.5px;font-weight:600;}
+  .pill.pending{background:var(--warn-soft);color:var(--warn-ink);}
+  .pill.confirmed{background:var(--crit-soft);color:var(--crit-ink);}
+  .pill.dismissed{background:var(--surface-2);color:var(--text-muted);}
+  .pill.info{background:var(--accent-soft);color:var(--accent-ink);}
+
+  .cred-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:6px;white-space:nowrap;}
+  .cred-badge.biasa{background:var(--surface-2);color:var(--text-muted);}
+  .cred-badge.pengaruh{background:var(--accent-soft);color:var(--accent-ink);}
+  .cred-badge.media{background:var(--accent);color:#fff;}
+
+  .btn{
+    border:1px solid var(--border);background:var(--surface);color:var(--text);
+    padding:6px 11px;border-radius:7px;font-size:11.5px;font-weight:600;
+    cursor:pointer;font-family:var(--font-ui);white-space:nowrap;
+  }
+  .btn:hover{background:var(--surface-2);}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .btn.primary:hover{background:var(--accent-ink);}
+  .btn.ghost{background:none;}
+  .btn:disabled{opacity:0.45;cursor:default;}
+  .btn-row{display:flex;gap:6px;}
+
+  .sort-toggle{display:flex;gap:6px;margin-bottom:14px;}
+  .sort-toggle button.on{background:var(--accent-soft);color:var(--accent-ink);border-color:var(--accent);}
+
+  .narr-grid{grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:800px){.narr-grid{grid-template-columns:1fr;}}
+  .quote{
+    background:var(--surface-2);border-left:3px solid var(--border);
+    border-radius:0 8px 8px 0;padding:10px 12px;font-size:12.5px;
+    color:var(--text-2);font-style:italic;margin-top:8px;
+  }
+  .tagrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;align-items:center;}
+  .tag{background:var(--surface-2);border-radius:6px;padding:3px 8px;font-size:11px;color:var(--text-2);font-family:var(--font-mono);}
+
+  .ai-suggest{background:var(--accent-soft);border:1px solid var(--accent);border-radius:10px;padding:14px 16px;}
+  .ai-suggest .lbl{font-size:11px;font-weight:700;color:var(--accent-ink);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+
+  .post-compact-row{display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:8px 0;border-bottom:1px solid var(--border);}
+  .post-compact-row:last-child{border-bottom:none;}
+
+  .playbook-level{border-radius:10px;padding:14px 16px;margin-bottom:12px;border:1px solid var(--border);}
+  .playbook-level h4{font-size:13.5px;margin-bottom:8px;}
+  .playbook-level ul{margin:0;padding-left:18px;font-size:12.5px;color:var(--text-2);}
+  .playbook-level li{margin-bottom:4px;}
+
+  .roadmap-cat{margin-bottom:22px;}
+  .roadmap-cat h4{font-size:13px;color:var(--accent-ink);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+  .roadmap-cat h4::before{content:"";width:16px;height:2px;background:var(--accent);display:inline-block;}
+  .roadmap-grid{grid-template-columns:repeat(2,1fr);}
+  @media(max-width:900px){.roadmap-grid{grid-template-columns:1fr;}}
+  .idea{background:var(--surface-2);border-radius:10px;padding:12px 14px;}
+  .idea .t{font-size:12.5px;font-weight:700;margin-bottom:5px;}
+  .idea .d{font-size:12px;color:var(--text-2);margin-bottom:6px;}
+  .idea .gap{font-size:11px;color:var(--text-muted);padding-top:6px;border-top:1px dashed var(--border);}
+  .idea .gap b{color:var(--text-2);}
+
+  .platform-grid{grid-template-columns:repeat(4,1fr);}
+  @media(max-width:800px){.platform-grid{grid-template-columns:repeat(2,1fr);}}
+  .plat-tile{background:var(--surface-2);border-radius:10px;padding:12px 13px;}
+  .plat-tile .ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .plat-tile .pname{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;}
+  .plat-tile .pname .off-tag{font-size:9.5px;font-weight:600;color:var(--text-muted);background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:1px 5px;}
+  .plat-tile .pshare{font-size:10.5px;color:var(--text-muted);}
+  .plat-tile .pval{font-family:var(--font-mono);font-size:19px;font-weight:700;}
+  .plat-tile.off{opacity:0.45;}
+
+  .svg-wrap{width:100%;overflow-x:auto;}
+  .svg-wrap svg{display:block;}
+  .table-wrap{overflow-x:auto;}
+
+  .sparkline{display:block;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ================= SIDEBAR ================= -->
+  <div class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">EW</div>
+      <div class="brand-text">
+        <div class="name">ANCANG</div>
+        <div class="tag">EWS Krisis Reputasi</div>
+      </div>
+    </div>
+
+    <div class="nav">
+      <div class="nav-label">Pemantauan</div>
+      <button class="nav-item active" data-tab="ringkasan"><span class="dot"></span>Ringkasan</button>
+      <button class="nav-item" data-tab="linimasa"><span class="dot"></span>Linimasa Eskalasi</button>
+      <button class="nav-item" data-tab="indikator"><span class="dot"></span>Indikator Komposit</button>
+      <button class="nav-item" data-tab="narasi"><span class="dot"></span>Divergensi Narasi</button>
+      <button class="nav-item" data-tab="posts"><span class="dot"></span>Unggahan Terdeteksi</button>
+    </div>
+    <div class="nav">
+      <div class="nav-label">Tindak Lanjut</div>
+      <button class="nav-item" data-tab="verifikasi"><span class="dot"></span>Verifikasi Analis</button>
+      <button class="nav-item" data-tab="playbook"><span class="dot"></span>Playbook Respons</button>
+    </div>
+    <div class="nav">
+      <div class="nav-label">Pengembangan</div>
+      <button class="nav-item" data-tab="roadmap"><span class="dot"></span>Roadmap Fitur</button>
+    </div>
+
+    <div class="sidebar-foot">
+      Prototipe dashboard — luaran <b>Tujuan Terapan</b>, skripsi<br>
+      "Efektivitas EWS Berbasis AI dalam Mendeteksi Potensi Krisis Reputasi", Renata Trixie Maran, Vokasi UI.
+    </div>
+  </div>
+
+  <!-- ================= MAIN ================= -->
+  <div class="main">
+
+    <div class="topbar">
+      <h1>Dashboard Peringatan Dini Krisis Reputasi</h1>
+      <div class="sub">Simulasi pemantauan multi-platform real-time berdasarkan kata kunci — empat indikator komposit, tiga tingkat eskalasi</div>
+    </div>
+
+    <div class="query-bar">
+      <input type="text" id="keyword-input" value="Brand Anda" maxlength="60" placeholder="Masukkan kata kunci, merek, produk, atau tokoh...">
+      <div class="platform-chips" id="platform-chips">
+        <button class="chip-toggle on" data-platform="x"><span class="sw"></span>X</button>
+        <button class="chip-toggle on" data-platform="instagram"><span class="sw"></span>Instagram</button>
+        <button class="chip-toggle on" data-platform="tiktok"><span class="sw"></span>TikTok</button>
+        <button class="chip-toggle on" data-platform="berita"><span class="sw"></span>Berita &amp; Forum</button>
+      </div>
+      <button class="btn primary" id="start-btn">Mulai Pantau</button>
+      <span class="live-pill paused" id="live-pill"><span class="pulse"></span><span id="live-pill-text">Belum dimulai</span></span>
+      <div class="query-hint">Pilih platform untuk disertakan dalam agregasi skor, lalu klik "Mulai Pantau" untuk memulai simulasi. Menonaktifkan platform langsung memengaruhi skor komposit dan daftar unggahan tanpa perlu memulai ulang.</div>
+    </div>
+
+    <div class="banner" id="global-banner">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 1.5 15 14H1L8 1.5Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M8 6.3v3.4M8 11.7v.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      <div><b>Ini adalah simulasi, bukan tarikan data sungguhan.</b> Menghubungkan langsung ke API resmi X, Instagram, dan TikTok memerlukan kredensial developer berbayar yang berada di luar cakupan prototipe ini. Volume, sentimen, unggahan individual (lengkap dengan kredibilitas sumber dan engagement), serta skor keempat indikator (deviasi volume berbobot kredibilitas, proporsi sentimen negatif, atribusi tanggung jawab, divergensi narasi) dibangkitkan oleh generator acak-berbobot yang berjalan di browser Anda. Tujuannya mendemonstrasikan mekanisme &amp; antarmuka EWS untuk validasi kelayakan operasional (Tujuan Terapan §1.3.4) — bukan analisis data nyata.</div>
+    </div>
+
+    <!-- ========== TAB: RINGKASAN ========== -->
+    <div class="tab-panel active" id="tab-ringkasan">
+
+      <div class="grid kpi-row">
+        <div class="card kpi">
+          <div class="label">Skor EWS Komposit</div>
+          <div class="value" id="kpi-score">–</div>
+          <span class="badge normal" id="kpi-badge"><span class="dot"></span>—</span>
+          <div class="foot">Ambang: Normal &lt;40 · Waspada 40–69 · Kritis ≥70</div>
+        </div>
+        <div class="card kpi">
+          <div class="label">Level Bertahan Sejak</div>
+          <div class="value" id="kpi-since">–</div>
+          <div class="delta" id="kpi-since-delta"></div>
+          <div class="foot">Analog lead time — jam sejak level eskalasi saat ini pertama terdeteksi</div>
+        </div>
+        <div class="card kpi">
+          <div class="label">Perubahan Volume (jendela 24 jam)</div>
+          <div class="value" id="kpi-volchange">–</div>
+          <div class="delta" id="kpi-volchange-delta"></div>
+          <div class="foot">Total mentah lintas platform aktif — bandingkan dengan skor Volume (kredibilitas) di kartu indikator</div>
+        </div>
+        <div class="card kpi">
+          <div class="label">Sentimen Negatif Saat Ini</div>
+          <div class="value" id="kpi-sent">–</div>
+          <div class="delta" id="kpi-sent-delta"></div>
+          <div class="foot">Estimasi simulasi, agregat lintas platform</div>
+        </div>
+        <div class="card kpi">
+          <div class="label">Sinyal Menunggu Verifikasi</div>
+          <div class="value" id="kpi-pending">0</div>
+          <div class="foot">Human-in-the-loop — lihat tab Verifikasi Analis</div>
+        </div>
+      </div>
+
+      <div class="grid two-col" style="margin-top:14px;">
+        <div class="card">
+          <div class="card-h">
+            <h3>Lintasan Skor EWS</h3>
+            <span class="hint" id="chart-main-hint">24 jam terakhir (live)</span>
+          </div>
+          <div id="chart-main" class="svg-wrap"></div>
+          <div class="legend">
+            <div class="item"><span class="sw" style="background:var(--good);"></span>Normal</div>
+            <div class="item"><span class="sw" style="background:var(--warn);"></span>Waspada</div>
+            <div class="item"><span class="sw" style="background:var(--crit);"></span>Kritis</div>
+            <div class="item"><span class="sw" style="background:var(--accent);"></span>Skor komposit</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h">
+            <h3>Kontribusi 4 Indikator</h3>
+            <span class="hint">saat ini</span>
+          </div>
+          <div id="indicator-mini"></div>
+        </div>
+      </div>
+
+      <div class="grid" style="grid-template-columns:1fr;margin-top:14px;">
+        <div class="card">
+          <div class="card-h">
+            <h3>Sumber Data — Sebaran Volume per Platform</h3>
+            <span class="hint" id="platform-hint">saat ini</span>
+          </div>
+          <div class="grid platform-grid" id="platform-tiles"></div>
+        </div>
+      </div>
+
+      <div class="grid two-col" style="margin-top:14px;">
+        <div class="card">
+          <div class="card-h"><h3>Unggahan Menonjol</h3><span class="hint">engagement tertinggi</span></div>
+          <div class="post-list-compact" id="posts-mini-list"></div>
+        </div>
+        <div class="card ai-suggest" id="trigger-suggestion"></div>
+      </div>
+
+      <div class="grid two-col" style="margin-top:14px;">
+        <div class="card">
+          <div class="card-h"><h3>Ringkasan Divergensi Narasi</h3></div>
+          <p style="color:var(--text-2);font-size:12.5px;" id="narr-summary-text">Mengukur pergeseran framing narasi publik dari narasi resmi — konsisten dengan teori atribusi tanggung jawab (Zhou &amp; Ki, 2018).</p>
+          <div class="quote" id="narr-summary-quote">—</div>
+          <div class="tagrow"><span class="tag" id="narr-summary-score">skor divergensi: —</span><span class="tag">indikator #4</span></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><h3>Rekomendasi Playbook Saat Ini</h3></div>
+          <p style="color:var(--text-2);font-size:12.5px;margin-bottom:8px;" id="playbook-mini-lead">—</p>
+          <ul style="margin:0;padding-left:18px;font-size:12.5px;color:var(--text-2);" id="playbook-mini-list"></ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== TAB: LINIMASA ========== -->
+    <div class="tab-panel" id="tab-linimasa">
+      <div class="card">
+        <div class="card-h">
+          <h3>Linimasa Volume Percakapan &amp; Skor Eskalasi</h3>
+          <span class="hint">24 jam terakhir (live)</span>
+        </div>
+        <div id="chart-timeline" class="svg-wrap"></div>
+        <div class="legend">
+          <div class="item"><span class="sw" style="background:var(--accent);"></span>Volume unggahan (batang, platform aktif)</div>
+          <div class="item"><span class="sw" style="background:var(--crit);border-radius:50%;"></span>Skor EWS komposit (garis)</div>
+        </div>
+      </div>
+
+      <div class="section-title">Log Peristiwa</div>
+      <div class="grid" style="gap:10px;" id="event-log"></div>
+    </div>
+
+    <!-- ========== TAB: INDIKATOR ========== -->
+    <div class="tab-panel" id="tab-indikator">
+      <div class="card" style="margin-bottom:14px;">
+        <div class="card-h">
+          <h3>Formula Skor Komposit</h3>
+        </div>
+        <p style="font-size:12.5px;color:var(--text-2);margin-bottom:10px;">
+          Skor = Σ (bobot indikator × skor ternormalisasi 0–100). Bobot bersifat hipotetis (Bab I, §1.5) dan divalidasi ulang secara empiris pada tahap konstruktif penelitian.
+        </p>
+        <div class="mono" style="font-size:12.5px;background:var(--surface-2);padding:10px 12px;border-radius:8px;overflow-x:auto;">
+          Skor = .30·Volume(Kredibilitas) + .30·Sentimen + .25·Atribusi + .15·Divergensi
+        </div>
+      </div>
+      <div class="grid" id="indicator-cards" style="grid-template-columns:repeat(2,1fr);gap:14px;"></div>
+    </div>
+
+    <!-- ========== TAB: NARASI ========== -->
+    <div class="tab-panel" id="tab-narasi">
+      <div class="card" style="margin-bottom:14px;">
+        <div class="card-h">
+          <h3>Indikator #4 — Divergensi Narasi</h3>
+          <span class="hint">dibantu AI untuk membaca konteks</span>
+        </div>
+        <p style="font-size:12.5px;color:var(--text-2);">Mengukur proporsi percakapan negatif yang menuduh organisasi tidak jujur, tidak aman, atau tidak kompeten — menyimpang dari narasi resmi. Komentar kasual seperti "iklannya lebay" atau "harganya kemahalan" tidak dihitung; yang dihitung adalah tuduhan yang menyerang kredibilitas organisasi. Kutipan di bawah adalah <b>contoh ilustratif hasil simulasi</b>, bukan cuplikan asli dari media sosial.</p>
+      </div>
+      <div class="grid narr-grid">
+        <div class="card">
+          <div class="card-h"><h3>Narasi Resmi Organisasi</h3><span class="pill dismissed">template</span></div>
+          <div class="quote" id="narr-official-quote">—</div>
+          <p style="font-size:11.5px;color:var(--text-muted);margin-top:10px;">Contoh pernyataan resmi generik — pada implementasi nyata, teks ini ditarik dari rilis pers atau akun resmi organisasi.</p>
+        </div>
+        <div class="card">
+          <div class="card-h"><h3>Narasi Publik Dominan</h3><span class="pill" id="narr-public-pill">simulasi</span></div>
+          <div class="quote" id="narr-public-quote">—</div>
+          <p style="font-size:11.5px;color:var(--text-muted);margin-top:10px;">Narasi yang menuduh ketidakjujuran/ketidakamanan/ketidakmampuan organisasi, bukan sekadar keluhan kasual.</p>
+        </div>
+      </div>
+      <div class="card" style="margin-top:14px;">
+        <div class="card-h"><h3>Skor Divergensi Sepanjang Waktu</h3></div>
+        <div id="chart-narrative" class="svg-wrap"></div>
+      </div>
+    </div>
+
+    <!-- ========== TAB: UNGGAHAN ========== -->
+    <div class="tab-panel" id="tab-posts">
+      <div class="card ai-suggest" id="trigger-suggestion-full" style="margin-bottom:14px;"></div>
+
+      <div class="card">
+        <div class="card-h">
+          <h3>Unggahan Terdeteksi</h3>
+          <span class="hint">lintas platform aktif, 24 jam terakhir</span>
+        </div>
+        <p style="font-size:12px;color:var(--text-2);margin-bottom:10px;">Setiap unggahan simulasi menampilkan sumber, kredibilitas, dan engagement — mendemonstrasikan bagaimana indikator Volume Berbasis Kredibilitas dapat tinggi walau jumlah unggahan mentah rendah, jika berasal dari akun berpengaruh atau media.</p>
+        <div class="sort-toggle">
+          <button class="btn on" data-sort="time">Terbaru</button>
+          <button class="btn" data-sort="engagement">Engagement Tertinggi</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Waktu</th><th>Platform</th><th>Sumber</th><th>Cuplikan</th><th>Kategori</th><th style="text-align:right;">Engagement</th></tr></thead>
+            <tbody id="posts-feed-table"></tbody>
+          </table>
+        </div>
+        <p id="posts-feed-empty" style="font-size:12.5px;color:var(--text-muted);padding:14px 0 0;display:none;">Belum ada unggahan — mulai pemantauan untuk melihat daftar terisi seiring waktu.</p>
+      </div>
+    </div>
+
+    <!-- ========== TAB: VERIFIKASI ========== -->
+    <div class="tab-panel" id="tab-verifikasi">
+      <div class="card" style="margin-bottom:14px;">
+        <div class="card-h"><h3>Antrean Verifikasi Analis (Human-in-the-Loop)</h3></div>
+        <p style="font-size:12.5px;color:var(--text-2);">Setiap sinyal yang melewati ambang batas ditandai sebagai <b>mentah</b> dan menunggu konfirmasi analis sebelum dianggap valid — memitigasi risiko false positive dari sarkasme, slang, dan campur kode (Batasan Penelitian §1.5). Antrean di bawah terisi otomatis selama simulasi berjalan.</p>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Waktu</th><th>Sinyal Terdeteksi</th><th>Indikator</th><th>Status</th><th></th></tr></thead>
+          <tbody id="alert-table"></tbody>
+        </table>
+        <p id="alert-empty" style="font-size:12.5px;color:var(--text-muted);padding:14px 0 0;display:none;">Belum ada sinyal — mulai pemantauan untuk melihat antrean terisi seiring waktu.</p>
+      </div>
+    </div>
+
+    <!-- ========== TAB: PLAYBOOK ========== -->
+    <div class="tab-panel" id="tab-playbook">
+      <div class="card" style="margin-bottom:14px;">
+        <div class="card-h"><h3>Playbook Penanganan per Tingkat Eskalasi</h3></div>
+        <p style="font-size:12.5px;color:var(--text-2);">Luaran terapan pendamping dashboard (Tujuan Terapan §1.3.4) — menerjemahkan skor menjadi langkah operasional konkret, selaras dengan Situational Crisis Communication Theory.</p>
+      </div>
+
+      <div class="playbook-level" style="background:var(--good-soft);border-color:var(--good);">
+        <h4><span class="badge normal" style="margin-right:6px;"><span class="dot"></span>NORMAL</span> Skor &lt; 40</h4>
+        <ul>
+          <li>Pemantauan pasif terjadwal (harian)</li>
+          <li>Tidak ada tindakan komunikasi publik</li>
+          <li>Perbarui baseline volume &amp; sentimen mingguan</li>
+        </ul>
+      </div>
+      <div class="playbook-level" style="background:var(--warn-soft);border-color:var(--warn);">
+        <h4><span class="badge waspada" style="margin-right:6px;"><span class="dot"></span>WASPADA</span> Skor 40–69</h4>
+        <ul>
+          <li>Analis memverifikasi manual sinyal yang memicu kenaikan skor</li>
+          <li>Siapkan draf <i>holding statement</i>, belum dipublikasikan</li>
+          <li>Petakan pemangku kepentingan &amp; siagakan juru bicara</li>
+          <li>Naikkan frekuensi pemantauan menjadi tiap 1–2 jam</li>
+          <li>Belum merespons publik sebelum verifikasi tuntas — hindari respons defensif prematur</li>
+        </ul>
+      </div>
+      <div class="playbook-level" style="background:var(--crit-soft);border-color:var(--crit);">
+        <h4><span class="badge kritis" style="margin-right:6px;"><span class="dot"></span>KRITIS</span> Skor ≥ 70</h4>
+        <ul>
+          <li>Aktifkan protokol krisis penuh &amp; koordinasi lintas divisi (legal, corporate comms, layanan pelanggan)</li>
+          <li>Juru bicara resmi merespons dengan pesan yang telah diverifikasi</li>
+          <li>Pemantauan real-time tiap 15 menit</li>
+          <li>Evaluasi eksplisit: "diam strategis" vs. respons aktif, mempertimbangkan risiko efek Streisand</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ========== TAB: ROADMAP ========== -->
+    <div class="tab-panel" id="tab-roadmap">
+      <div class="card" style="margin-bottom:18px;">
+        <div class="card-h"><h3>Eksplorasi Pengembangan Fitur Lanjutan</h3></div>
+        <p style="font-size:12.5px;color:var(--text-2);">Prototipe ini mengimplementasikan model hipotetis awal pada Bab I. Setiap ide di bawah merespons langsung salah satu batasan penelitian (§1.5) atau memperluas nilai bagi tiga penerima manfaat (§1.4): agensi, organisasi/klien, dan akademisi.</p>
+      </div>
+      <div id="roadmap-content"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIG
+   ============================================================ */
+const WINDOW = 24; // simulated hours kept in the rolling view
+const TICK_MS = 3000; // 1 tick = 1 simulated hour
+const WEIGHTS = { vol:0.30, sent:0.30, attr:0.25, narr:0.15 };
+const PLATFORM_META = {
+  x:        { label:'X',              icon:'𝕏', baseShare:0.42 },
+  instagram:{ label:'Instagram',       icon:'📷', baseShare:0.26 },
+  tiktok:   { label:'TikTok',          icon:'🎵', baseShare:0.20 },
+  berita:   { label:'Berita & Forum',  icon:'📰', baseShare:0.12 },
+};
+const PLATFORM_KEYS = Object.keys(PLATFORM_META);
+
+const CRED_META = {
+  biasa:    { label:'Akun biasa',           weight:1 },
+  pengaruh: { label:'Akun berpengaruh',     weight:4 },
+  media:    { label:'Media / figur publik', weight:9 },
+};
+const CATEGORY_META = {
+  netral:     { label:'Netral',              cls:'dismissed' },
+  keluhan:    { label:'Keluhan',             cls:'pending' },
+  atribusi:   { label:'Atribusi Kelalaian',  cls:'confirmed' },
+  divergensi: { label:'Divergensi Narasi',   cls:'info' },
+};
+const TEMPLATES = {
+  netral: [
+    'Ada yang udah pernah coba {keyword}? Worth it nggak sih?',
+    'Baru denger soal {keyword} hari ini, lumayan menarik.',
+    'Random, tapi {keyword} muncul terus di linimasa gue akhir-akhir ini.',
+  ],
+  keluhan: [
+    'Pelayanan {keyword} lambat banget, udah nunggu lama.',
+    'Kecewa sama {keyword}, baru dipakai sebentar udah bermasalah.',
+    'Agak nyesel pilih {keyword}, ekspektasi nggak sesuai kenyataan.',
+  ],
+  atribusi: [
+    '{keyword} udah tau ada masalah tapi tetap dijual ke konsumen, ini kelalaian.',
+    'Ini bukan apes doang, {keyword} emang nggak serius urus komplain dari awal.',
+    'Kalau manajemen {keyword} dari awal transparan, nggak bakal sebesar ini.',
+  ],
+  divergensi: [
+    'Katanya {keyword} aman, tapi kok banyak yang bilang mereka nutup-nutupin masalahnya?',
+    'Pernyataan resmi {keyword} kayaknya nggak match sama yang sebenernya kejadian di lapangan.',
+    '{keyword} klaim udah ditangani, padahal yang kena dampak bilang belum ada tindak lanjut.',
+  ],
+};
+
+const PLAYBOOK = {
+  normal:  { label:'NORMAL',  cls:'normal',  lead:'Pemantauan pasif — belum ada indikasi eskalasi:',
+    items:['Pemantauan pasif terjadwal (harian)','Tidak ada tindakan komunikasi publik','Perbarui baseline volume & sentimen mingguan'] },
+  waspada: { label:'WASPADA', cls:'waspada', lead:'Status <b style="color:var(--warn-ink);">WASPADA</b> → verifikasi &amp; siapkan mitigasi:',
+    items:['Analis memverifikasi manual sinyal yang memicu kenaikan skor','Siapkan draf holding statement, belum dipublikasikan','Petakan pemangku kepentingan & siagakan juru bicara','Naikkan frekuensi pemantauan menjadi tiap 1–2 jam'] },
+  kritis:  { label:'KRITIS',  cls:'kritis',  lead:'Status <b style="color:var(--crit-ink);">KRITIS</b> → aktifkan protokol krisis penuh:',
+    items:['Juru bicara resmi merespons dengan pesan terverifikasi legal & komunikasi','Pemantauan real-time tiap 15 menit','Evaluasi opsi "diam strategis" vs. respons aktif (SCCT)'] },
+};
+
+const INDICATOR_META = [
+  { id:'vol',  name:'Deviasi Volume Berbasis Kredibilitas', weight:30,
+    desc:'Deviasi volume percakapan dari baseline, ditimbang oleh kredibilitas dan pengaruh akun/media yang terlibat. Sejumlah kecil akun ahli, media kredibel, atau figur publik dapat menghasilkan skor tinggi meski volume mentahnya relatif rendah.' },
+  { id:'sent', name:'Proporsi Sentimen Negatif', weight:30,
+    desc:'Persentase percakapan bernada negatif terhadap organisasi, termasuk keluhan umum sekalipun belum menyalahkan pihak tertentu.' },
+  { id:'attr', name:'Atribusi Tanggung Jawab', weight:25,
+    desc:'Proporsi percakapan negatif yang menyalahkan organisasi atas kelalaian atau kesengajaan — bukan sekadar mengeluh soal produk.' },
+  { id:'narr', name:'Divergensi Narasi', weight:15,
+    desc:'Proporsi percakapan negatif yang menuduh organisasi tidak jujur, tidak aman, atau tidak kompeten — menyimpang dari narasi resmi (dibantu AI untuk membaca konteks, bukan sekadar komentar kasual).' },
+];
+
+const ROADMAP = [
+  { cat:'Cakupan Data & Sumber', items:[
+    { t:'Integrasi API resmi multi-platform', d:'Prototipe ini sudah mensimulasikan agregasi lintas X, Instagram, TikTok, dan Berita — langkah berikutnya adalah kredensial API resmi tiap platform untuk data sungguhan.', gap:'Batasan §1.5.1 — sampling asli penelitian terbatas pada X.' },
+    { t:'Audit representativitas sampling', d:'Kurangi bias sampling purposive berbasis kata kunci dengan sumber data yang lebih representatif secara demografis.', gap:'Batasan §1.5.1 — demografi X tidak mewakili populasi.' },
+    { t:'Dukungan dialek & bahasa daerah', d:'Perluas cakupan di luar Bahasa Indonesia baku ke dialek/bahasa daerah yang lazim pada isu lokal.', gap:'Perluasan Tujuan Konstruktif §1.3.2.' },
+  ]},
+  { cat:'Kedalaman AI & NLP', items:[
+    { t:'Fine-tuning model NLP lokal', d:'Latih model berbasis IndoBERT/LLM lokal khusus untuk slang, sarkasme, dan campur kode Bahasa Indonesia.', gap:'Batasan §1.5.4 — leksikon sentimen konvensional bias pada nuansa lokal.' },
+    { t:'Explainable AI pada tiap alert', d:'Setiap skor disertai jejak bukti: kutipan asli & fitur linguistik yang memicu kenaikan skor, bukan angka kotak-hitam.', gap:'Mendukung verifikasi human-in-the-loop agar lebih cepat & akuntabel.' },
+    { t:'Deteksi amplifikasi tidak organik', d:'Bedakan lonjakan akibat bot/kampanye promosi dari eskalasi krisis yang valid secara otomatis.', gap:'Batasan §1.5.3 — validitas anomali vs. krisis.' },
+    { t:'Indikator tambahan opsional: anomali kata kunci & kecepatan difusi', d:'Dua indikator awal pada versi sebelumnya disederhanakan keluar dari 4 indikator inti demi kelayakan operasional, namun tetap terbuka diaktifkan sebagai sinyal pelengkap pada versi lanjutan.', gap:'Menjaga jejak iterasi model dari enam menjadi empat indikator inti.' },
+  ]},
+  { cat:'Actionability & Otomasi', items:[
+    { t:'Draf respons berbantuan LLM', d:'Saat status Waspada/Kritis terpicu, sistem otomatis menyusun draf holding statement untuk direview manusia — bukan dikirim otomatis.', gap:'Percepat Playbook §1.3.4 tanpa mengorbankan human-in-the-loop.' },
+    { t:'Ekspor daftar unggahan untuk audit manual', d:'Unduh daftar unggahan terdeteksi (dengan kredibilitas & engagement) sebagai arsip bukti untuk tim legal/komunikasi.', gap:'Mendukung lapisan verifikasi human-in-the-loop yang auditable.' },
+    { t:'Mode simulasi/what-if terhadap kasus nyata', d:'Uji ambang batas & bobot indikator terhadap arsip kasus historis nyata sebelum diterapkan pada pemantauan langsung.', gap:'Mendukung validasi retrospektif Tujuan Evaluatif §1.3.3.' },
+  ]},
+  { cat:'Kolaborasi & Tata Kelola', items:[
+    { t:'Manajemen multi-klien untuk agensi', d:'Heatmap risiko lintas klien/brand dalam satu portofolio, sesuai kebutuhan agensi komunikasi.', gap:'Manfaat §1.4.1 — efisiensi penyaringan bagi agensi.' },
+    { t:'Log audit human-in-the-loop', d:'Catat siapa memverifikasi, kapan, dan alasannya — mendukung akuntabilitas dan kepatuhan etis/UU PDP.', gap:'Menjawab batas etis pada Tujuan Terapan §1.3.4.' },
+    { t:'Kontrol akses berjenjang', d:'Tampilan berbeda untuk analis, juru bicara, dan manajemen sesuai kebutuhan informasi masing-masing peran.', gap:'Kesiapan operasional lintas tim dalam organisasi/klien.' },
+  ]},
+  { cat:'Analitik Lanjutan & Pembelajaran', items:[
+    { t:'Forecasting lintasan eskalasi', d:'Prediksi arah skor beberapa jam ke depan, melampaui klasifikasi status saat ini semata.', gap:'Memperkuat lead time yang menjadi inti H1 pada Tujuan Evaluatif.' },
+    { t:'Evaluasi pasca-krisis & bobot adaptif', d:'Ukur efektivitas respons terhadap penurunan skor, lalu sesuaikan bobot indikator secara berkala.', gap:'Menutup siklus pembelajaran yang belum tercakup pada model hipotetis awal.' },
+    { t:'Benchmark historis & industri', d:'Bandingkan pola eskalasi kata kunci baru terhadap arsip kasus sejenis untuk kalibrasi ambang batas.', gap:'Manfaat §1.4.3 — model rujukan yang dapat direplikasi akademisi.' },
+  ]},
+];
+
+/* ============================================================
+   RNG + STATE
+   ============================================================ */
+function hashString(s){ let h=1779033703; for(let i=0;i<s.length;i++){ h=Math.imul(h^s.charCodeAt(i),3432918353); h=(h<<13)|(h>>>19); } return h>>>0; }
+function mulberry32(seed){ let a=seed; return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function clamp(v,lo,hi){ return Math.max(lo,Math.min(hi,v)); }
+function scoreCurve(x,k){ return 100*(1-Math.exp(-Math.max(0,x)/k)); }
+function pickWeighted(rng, pairs){
+  const total = pairs.reduce((s,p)=>s+Math.max(0,p[1]),0) || 1;
+  let r = rng()*total;
+  for(const [val,w] of pairs){ r -= Math.max(0,w); if(r<=0) return val; }
+  return pairs[pairs.length-1][0];
+}
+function pickFrom(rng, arr){ return arr[Math.floor(rng()*arr.length)]; }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+const STATE = {
+  keyword:'', rng:null, magnitude:60, scenario:'tenang', spikeAt:null,
+  platforms:{ x:true, instagram:true, tiktok:true, berita:true },
+  buckets:[], // {vol:{x,instagram,tiktok,berita}, sentNeg, attrBoost, posts:[...]}
+  alerts:[], alertSeq:0, postSeq:0, meningkatCredibleUsed:false,
+  log:[], running:false, timer:null, tickIndex:0, postSort:'time',
+};
+
+function initSession(keyword){
+  STATE.keyword = keyword || 'Brand Anda';
+  STATE.rng = mulberry32((hashString(STATE.keyword) ^ (Date.now()&0xffffffff))>>>0);
+  STATE.magnitude = 25 + STATE.rng()*220;
+  const r = STATE.rng();
+  STATE.scenario = r<0.4 ? 'tenang' : r<0.75 ? 'meningkat' : 'lonjakan';
+  STATE.spikeAt = STATE.scenario==='lonjakan' ? (10 + Math.floor(STATE.rng()*10)) : null;
+  STATE.buckets = [];
+  STATE.alerts = []; STATE.alertSeq = 0; STATE.postSeq = 0; STATE.meningkatCredibleUsed = false;
+  STATE.log = [];
+  STATE.tickIndex = 0;
+  for(let i=0;i<WINDOW;i++){ generateNextBucket(); }
+}
+
+function generateAuthor(platform, credKey, rng){
+  if(credKey==='media'){
+    const outlets = ['Kabar Harian','Lensa Media','Info Nasional','Warta Kini','Media Publik'];
+    return pickFrom(rng, outlets);
+  }
+  if(credKey==='pengaruh'){
+    const names = ['kreator_opini','pengamat.publik','suara_warga','akun_influens','komentator_sosial'];
+    return '@'+pickFrom(rng, names)+Math.floor(rng()*90+10);
+  }
+  const common = ['warganet','pengguna','akun','netizen','sobat_medsos','warga_digital'];
+  return '@'+pickFrom(rng, common)+Math.floor(rng()*9000+100);
+}
+
+function makePostsForBucket(bucket, keyword, guaranteeCredible){
+  const rng = STATE.rng;
+  const sentNeg = bucket.sentNeg;
+  const count = 2 + Math.floor(rng()*4); // 2-5 posts per simulated hour
+  const posts = [];
+  const wNetral = Math.max(5, 100-sentNeg);
+  const wKeluhan = sentNeg*1.0;
+  const wAtribusi = sentNeg*0.5 + (bucket.attrBoost||0)*1.8;
+  const wDivergensi = sentNeg*0.3 + Math.max(0,sentNeg-35)*0.5;
+
+  for(let k=0;k<count;k++){
+    let category = pickWeighted(rng, [['netral',wNetral],['keluhan',wKeluhan],['atribusi',wAtribusi],['divergensi',wDivergensi]]);
+    let credKey = pickWeighted(rng, [['biasa',80],['pengaruh',15],['media',5]]);
+    if(guaranteeCredible && k===0){
+      credKey = rng()<0.5 ? 'media' : 'pengaruh';
+      if(category==='netral') category = rng()<0.5 ? 'atribusi' : 'divergensi';
+    }
+    const platform = pickWeighted(rng, PLATFORM_KEYS.map(p=>[p, (bucket.vol[p]||0)+1]));
+    const text = pickFrom(rng, TEMPLATES[category]).replace(/\{keyword\}/g, keyword);
+    const credMeta = CRED_META[credKey];
+    const engBase = { x:40, instagram:25, tiktok:55, berita:15 }[platform];
+    const engagement = Math.max(1, Math.round(engBase*credMeta.weight*(0.3+Math.pow(rng(),3)*9)));
+    posts.push({ id: ++STATE.postSeq, category, credKey, platform, text, author: generateAuthor(platform,credKey,rng), engagement });
+  }
+  return posts;
+}
+
+function generateNextBucket(){
+  const rng = STATE.rng;
+  const prev = STATE.buckets[STATE.buckets.length-1];
+  const prevTotal = prev ? PLATFORM_KEYS.reduce((s,p)=>s+prev.vol[p],0) : STATE.magnitude;
+
+  let drift = 0;
+  let guaranteeCredible = false;
+  if(STATE.scenario==='meningkat'){
+    drift = 0.03 + STATE.tickIndex*0.012;
+  } else if(STATE.scenario==='lonjakan' && STATE.spikeAt!=null){
+    const rel = STATE.tickIndex - STATE.spikeAt;
+    if(rel>=0 && rel<4){ drift = 1.1 + rng()*1.1; if(rel===0) guaranteeCredible = true; }
+    else if(rel>=4 && rel<9) drift = -0.18 - rng()*0.12; // decay after peak
+    else drift = (rng()-0.5)*0.10;
+  } else {
+    drift = (rng()-0.5)*0.12;
+  }
+
+  let total = Math.max(4, prevTotal===undefined ? STATE.magnitude : prevTotal*(1+drift) + (rng()-0.45)*STATE.magnitude*0.08);
+  if(STATE.scenario==='tenang') total = total*0.9 + STATE.magnitude*0.1;
+
+  const vol = {};
+  let remaining = total;
+  PLATFORM_KEYS.forEach((p,idx)=>{
+    const jitter = 1 + (rng()-0.5)*0.5;
+    const share = PLATFORM_META[p].baseShare*jitter;
+    if(idx===PLATFORM_KEYS.length-1){ vol[p] = Math.max(0, remaining); }
+    else { const v = Math.max(0, total*share); vol[p] = v; remaining -= v; }
+  });
+
+  const totalDeviation = prevTotal ? (total-prevTotal)/Math.max(prevTotal,1)*100 : 0;
+  const sentTargetBase = 12 + clamp(totalDeviation,0,400)*0.12;
+  const prevSent = prev ? prev.sentNeg : 14;
+  const sentNeg = clamp(prevSent*0.55 + sentTargetBase*0.45 + (rng()-0.5)*6, 4, 92);
+
+  let attrBoost = 0;
+  if(STATE.scenario==='lonjakan' && STATE.spikeAt!=null && STATE.tickIndex===STATE.spikeAt+1){
+    attrBoost = 18 + rng()*18; // simulated defensive response worsening attribution
+  }
+  if(STATE.scenario==='meningkat' && !STATE.meningkatCredibleUsed && sentNeg>=38){
+    guaranteeCredible = true; STATE.meningkatCredibleUsed = true;
+  }
+
+  const bucket = { vol, sentNeg, attrBoost };
+  bucket.posts = makePostsForBucket(bucket, STATE.keyword, guaranteeCredible);
+
+  STATE.buckets.push(bucket);
+  if(STATE.buckets.length>WINDOW) STATE.buckets.shift();
+  STATE.tickIndex++;
+}
+
+function activeTotals(){
+  return STATE.buckets.map(b => PLATFORM_KEYS.reduce((s,p)=> s + (STATE.platforms[p]? b.vol[p]:0), 0));
+}
+
+function flattenPosts(){
+  const n = STATE.buckets.length;
+  const out = [];
+  STATE.buckets.forEach((b,i)=>{
+    (b.posts||[]).forEach(p=>{
+      if(STATE.platforms[p.platform]) out.push(Object.assign({}, p, { bucketIdx:i, timeLabel: bucketLabel(i,n) }));
+    });
+  });
+  return out;
+}
+
+function computeTriggerSuggestion(posts){
+  if(posts.length<5) return null;
+  const sorted = [...posts].sort((a,b)=> a.bucketIdx-b.bucketIdx || a.id-b.id);
+  const engs = posts.map(p=>p.engagement).slice().sort((a,b)=>a-b);
+  const idx = Math.min(engs.length-1, Math.floor(engs.length*0.75));
+  const threshold = engs[idx];
+  if(!threshold) return null;
+  return sorted.find(p=> p.category!=='netral' && p.engagement>=threshold) || null;
+}
+
+function computeDerived(){
+  const n = STATE.buckets.length;
+  const totals = activeTotals();
+
+  const weightedVol = STATE.buckets.map(b => (b.posts||[]).reduce((s,p)=> s + (STATE.platforms[p.platform] ? CRED_META[p.credKey].weight : 0), 0));
+  const baselineN = Math.min(6,n);
+  const wBaseline = weightedVol.slice(0,baselineN).reduce((a,b)=>a+b,0)/Math.max(baselineN,1) || 1;
+
+  const vol=[],sent=[],attr=[],narr=[],composite=[];
+  const span = 3;
+  for(let i=0;i<n;i++){
+    const dev = (weightedVol[i]-wBaseline)/Math.max(wBaseline,1)*100;
+    vol.push(scoreCurve(dev,150));
+
+    const windowPosts = [];
+    for(let j=Math.max(0,i-span+1); j<=i; j++){
+      (STATE.buckets[j].posts||[]).forEach(p=>{ if(STATE.platforms[p.platform]) windowPosts.push(p); });
+    }
+    const totalP = windowPosts.length;
+    const negP = windowPosts.filter(p=>p.category!=='netral').length;
+    const atrP = windowPosts.filter(p=>p.category==='atribusi').length;
+    const divP = windowPosts.filter(p=>p.category==='divergensi').length;
+    sent.push(totalP ? negP/totalP*100 : STATE.buckets[i].sentNeg);
+    attr.push(negP ? atrP/negP*100 : 0);
+    narr.push(negP ? divP/negP*100 : 0);
+
+    composite.push(WEIGHTS.vol*vol[i] + WEIGHTS.sent*sent[i] + WEIGHTS.attr*attr[i] + WEIGHTS.narr*narr[i]);
+  }
+  return { totals, vol, sent, attr, narr, composite };
+}
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+function levelOf(score){ return score>=70?'kritis':score>=40?'waspada':'normal'; }
+function levelColorVar(level){ return level==='kritis' ? '--crit' : level==='waspada' ? '--warn' : '--good'; }
+function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+function levelLabel(level){ return level==='kritis'?'KRITIS':level==='waspada'?'WASPADA':'NORMAL'; }
+function fmtInt(n){ return Math.round(n).toLocaleString('id-ID'); }
+function bucketLabel(i,n){ const hoursAgo = n-1-i; return hoursAgo===0 ? 'Sekarang' : `-${hoursAgo}j`; }
+
+/* ============================================================
+   CHART: main composite trajectory (area + threshold bands)
+   ============================================================ */
+function renderMainChart(derived){
+  const composite = derived.composite;
+  const n = composite.length;
+  const W=560,H=210,padL=32,padR=14,padT=14,padB=26;
+  const plotW=W-padL-padR, plotH=H-padT-padB;
+  const x = i => padL + (n<=1?0:(i/(n-1))*plotW);
+  const y = v => padT + plotH - (v/100)*plotH;
+
+  const bandNormal = 40, bandWaspada = 70;
+  const good=cssVar('--good'), warn=cssVar('--warn'), crit=cssVar('--crit'), accent=cssVar('--accent'), muted=cssVar('--text-muted'), border=cssVar('--border');
+
+  let bands = `
+    <rect x="${padL}" y="${y(100)}" width="${plotW}" height="${y(bandWaspada)-y(100)}" fill="${crit}" opacity="0.08"/>
+    <rect x="${padL}" y="${y(bandWaspada)}" width="${plotW}" height="${y(bandNormal)-y(bandWaspada)}" fill="${warn}" opacity="0.10"/>
+    <rect x="${padL}" y="${y(bandNormal)}" width="${plotW}" height="${y(0)-y(bandNormal)}" fill="${good}" opacity="0.08"/>
+  `;
+  let gridlines = [0,40,70,100].map(v=>`<line x1="${padL}" y1="${y(v)}" x2="${W-padR}" y2="${y(v)}" stroke="${border}" stroke-width="1"/><text x="${padL-6}" y="${y(v)+3}" font-size="9" fill="${muted}" text-anchor="end" font-family="var(--font-mono)">${v}</text>`).join('');
+  let points = composite.map((v,i)=>`${x(i)},${y(v)}`).join(' ');
+  let area = n>0 ? `M${x(0)},${y(0)} L` + composite.map((v,i)=>`${x(i)},${y(v)}`).join(' L') + ` L${x(n-1)},${y(0)} Z` : '';
+  let dots = composite.map((v,i)=>{
+    const col = cssVar(levelColorVar(levelOf(v)));
+    return `<circle cx="${x(i)}" cy="${y(v)}" r="${i===n-1?5:3.5}" fill="${col}" stroke="var(--surface)" stroke-width="2"/>`;
+  }).join('');
+  let labelIdx = [0, Math.floor((n-1)/2), n-1].filter((v,i,arr)=>arr.indexOf(v)===i);
+  let labels = labelIdx.map(i=>`<text x="${x(i)}" y="${H-6}" font-size="9.5" fill="${muted}" text-anchor="middle">${bucketLabel(i,n)}</text>`).join('');
+
+  document.getElementById('chart-main').innerHTML = `
+  <svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px;height:auto;">
+    ${bands}${gridlines}
+    <path d="${area}" fill="${accent}" opacity="0.10"/>
+    <polyline points="${points}" fill="none" stroke="${accent}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${dots}
+    ${labels}
+  </svg>`;
+}
+
+/* ============================================================
+   CHART: timeline volume bars + composite line
+   ============================================================ */
+function renderTimelineChart(derived){
+  const { totals, composite } = derived;
+  const n = totals.length;
+  const W=920,H=280,padL=48,padR=16,padT=20,padB=32;
+  const plotW=W-padL-padR, plotH=H-padT-padB;
+  const maxVol = Math.max(1,...totals)*1.08;
+  const bw = n>0 ? plotW/n*0.5 : 10;
+  const xC = i => padL + (i+0.5)*(plotW/Math.max(n,1));
+  const yVol = v => padT + plotH - (v/maxVol)*plotH;
+  const yScore = v => padT + plotH - (v/100)*plotH;
+  const accent=cssVar('--accent'), crit=cssVar('--crit'), muted=cssVar('--text-muted'), border=cssVar('--border');
+
+  let gridlines = [0,0.25,0.5,0.75,1].map(f=>{
+    const val = Math.round(maxVol*f);
+    return `<line x1="${padL}" y1="${yVol(val)}" x2="${W-padR}" y2="${yVol(val)}" stroke="${border}" stroke-width="1"/><text x="${padL-8}" y="${yVol(val)+3}" font-size="9.5" fill="${muted}" text-anchor="end" font-family="var(--font-mono)">${fmtInt(val)}</text>`;
+  }).join('');
+
+  let bars = totals.map((v,i)=>`<rect x="${xC(i)-bw/2}" y="${yVol(v)}" width="${bw}" height="${yVol(0)-yVol(v)}" rx="3" fill="${accent}" opacity="0.75"/>`).join('');
+  let scorePts = composite.map((v,i)=>`${xC(i)},${yScore(v)}`).join(' ');
+  let scoreDots = composite.map((v,i)=>`<circle cx="${xC(i)}" cy="${yScore(v)}" r="3.5" fill="${crit}" stroke="var(--surface)" stroke-width="1.5"/>`).join('');
+  let labelIdx = [0,4,8,12,16,20,n-1].filter((v,i,a)=>v>=0 && v<n && a.indexOf(v)===i);
+  let labels = labelIdx.map(i=>`<text x="${xC(i)}" y="${H-8}" font-size="10" fill="${muted}" text-anchor="middle">${bucketLabel(i,n)}</text>`).join('');
+
+  document.getElementById('chart-timeline').innerHTML = `
+  <svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px;height:auto;">
+    ${gridlines}${bars}
+    <polyline points="${scorePts}" fill="none" stroke="${crit}" stroke-width="2" stroke-dasharray="4 3"/>
+    ${scoreDots}
+    ${labels}
+  </svg>`;
+}
+
+/* ============================================================
+   CHART: narrative divergence over time
+   ============================================================ */
+function renderNarrativeChart(derived){
+  const series = derived.narr;
+  const n = series.length;
+  const W=760,H=140,padL=30,padR=14,padT=14,padB=24;
+  const plotW=W-padL-padR, plotH=H-padT-padB;
+  const x = i => padL + (n<=1?0:(i/(n-1))*plotW);
+  const y = v => padT + plotH - (v/100)*plotH;
+  const accent=cssVar('--accent'), muted=cssVar('--text-muted'), border=cssVar('--border');
+  let grid=[0,50,100].map(v=>`<line x1="${padL}" y1="${y(v)}" x2="${W-padR}" y2="${y(v)}" stroke="${border}"/><text x="${padL-6}" y="${y(v)+3}" font-size="9" fill="${muted}" text-anchor="end">${v}</text>`).join('');
+  let area = n>0 ? `M${x(0)},${y(0)} L`+series.map((v,i)=>`${x(i)},${y(v)}`).join(' L')+` L${x(n-1)},${y(0)} Z` : '';
+  let line = series.map((v,i)=>`${x(i)},${y(v)}`).join(' ');
+  let dots = series.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="3" fill="${accent}"/>`).join('');
+  let labelIdx = [0, Math.floor((n-1)/2), n-1].filter((v,i,arr)=>arr.indexOf(v)===i);
+  let labels = labelIdx.map(i=>`<text x="${x(i)}" y="${H-6}" font-size="9.5" fill="${muted}" text-anchor="middle">${bucketLabel(i,n)}</text>`).join('');
+  document.getElementById('chart-narrative').innerHTML = `
+  <svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px;height:auto;">
+    ${grid}
+    <path d="${area}" fill="${accent}" opacity="0.12"/>
+    <polyline points="${line}" fill="none" stroke="${accent}" stroke-width="2"/>
+    ${dots}${labels}
+  </svg>`;
+}
+
+function sparkline(series, color){
+  const W=110,H=28,pad=3;
+  const max=100;
+  const n=series.length;
+  const x=i=>pad+(n<=1?0:(i/(n-1))*(W-2*pad));
+  const y=v=>pad+(H-2*pad)-(v/max)*(H-2*pad);
+  const pts=series.map((v,i)=>`${x(i)},${y(v)}`).join(' ');
+  return `<svg class="sparkline" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+}
+
+/* ============================================================
+   RENDER: KPIs
+   ============================================================ */
+function computeLeadTime(composite){
+  const n = composite.length;
+  if(n===0) return { level:'normal', hours:0 };
+  const curLevel = levelOf(composite[n-1]);
+  if(curLevel==='normal') return { level:'normal', hours:0 };
+  let i = n-1;
+  while(i>0 && levelOf(composite[i-1])!=='normal') i--;
+  return { level:curLevel, hours: n-1-i };
+}
+
+function renderKPIs(derived){
+  const n = derived.composite.length;
+  const cur = derived.composite[n-1] || 0;
+  const prevIdx = Math.max(0,n-2);
+  const level = levelOf(cur);
+
+  document.getElementById('kpi-score').textContent = Math.round(cur);
+  const badge = document.getElementById('kpi-badge');
+  badge.className = 'badge '+level;
+  badge.innerHTML = `<span class="dot"></span>${levelLabel(level)}`;
+
+  const lead = computeLeadTime(derived.composite);
+  document.getElementById('kpi-since').textContent = lead.level==='normal' ? 'Normal' : `${lead.hours} jam`;
+  document.getElementById('kpi-since-delta').textContent = lead.level==='normal' ? 'Tidak ada eskalasi aktif' : `sejak status ${levelLabel(lead.level).toLowerCase()} dimulai`;
+
+  const totals = derived.totals;
+  const first = totals[0]||0, last = totals[n-1]||0;
+  const pct = first>0 ? ((last-first)/first*100) : 0;
+  document.getElementById('kpi-volchange').textContent = (pct>=0?'+':'')+pct.toFixed(0)+'%';
+  const dEl = document.getElementById('kpi-volchange-delta');
+  dEl.className = 'delta '+(pct>=0?'up':'down');
+  dEl.textContent = `${fmtInt(first)} → ${fmtInt(last)} unggahan`;
+
+  const sentCur = derived.sent[n-1]||0, sentPrev = derived.sent[prevIdx]||sentCur;
+  document.getElementById('kpi-sent').textContent = sentCur.toFixed(1)+'%';
+  const sd = document.getElementById('kpi-sent-delta');
+  const sentDelta = sentCur-sentPrev;
+  sd.className = 'delta '+(sentDelta>=0?'up':'down');
+  sd.textContent = (sentDelta>=0?'↑ ':'↓ ')+Math.abs(sentDelta).toFixed(1)+' pt vs. jam sebelumnya';
+
+  document.getElementById('kpi-pending').textContent = STATE.alerts.filter(a=>a.status==='pending').length;
+}
+
+/* ============================================================
+   RENDER: indicators
+   ============================================================ */
+function renderIndicatorMini(derived){
+  const n = derived.composite.length-1;
+  const html = INDICATOR_META.map(ind=>{
+    const val = Math.round(derived[ind.id][n]||0);
+    const col = val>=70?cssVar('--crit'):val>=40?cssVar('--warn'):cssVar('--good');
+    return `<div class="indicator-row">
+      <div class="meta"><div class="t">${ind.name}</div><div class="w">bobot ${ind.weight}%</div></div>
+      <div class="bartrack"><div class="barfill" style="width:${val}%;background:${col};"></div></div>
+      <div class="val">${val}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('indicator-mini').innerHTML = html;
+}
+
+function renderIndicatorCards(derived){
+  const n = derived.composite.length-1;
+  const html = INDICATOR_META.map(ind=>{
+    const series = derived[ind.id];
+    const val = Math.round(series[n]||0);
+    const mark = val>=70?'var(--crit)':val>=40?'var(--warn)':'var(--good)';
+    const ink = val>=70?'var(--crit-ink)':val>=40?'var(--warn-ink)':'var(--good-ink)';
+    return `<div class="card">
+      <div class="card-h">
+        <h3>${ind.name}</h3>
+        <span class="hint">bobot ${ind.weight}%</span>
+      </div>
+      <p style="font-size:12px;color:var(--text-2);margin-bottom:10px;">${ind.desc}</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        ${sparkline(series, mark)}
+        <div style="text-align:right;">
+          <div class="mono" style="font-size:20px;font-weight:700;color:${ink};">${val}</div>
+          <div style="font-size:10px;color:var(--text-muted);">skor saat ini</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('indicator-cards').innerHTML = html;
+}
+
+/* ============================================================
+   RENDER: platform tiles
+   ============================================================ */
+function renderPlatformTiles(){
+  const n = STATE.buckets.length;
+  const html = PLATFORM_KEYS.map(p=>{
+    const meta = PLATFORM_META[p];
+    const series = STATE.buckets.map(b=>b.vol[p]);
+    const cur = series[n-1]||0;
+    const activeTotalNow = PLATFORM_KEYS.reduce((s,k)=> s+(STATE.platforms[k]?(STATE.buckets[n-1]?STATE.buckets[n-1].vol[k]:0):0),0)||1;
+    const share = STATE.platforms[p] ? (cur/activeTotalNow*100) : 0;
+    const on = STATE.platforms[p];
+    const maxV = Math.max(1,...series);
+    const normSeries = series.map(v=>v/maxV*100);
+    return `<div class="plat-tile ${on?'':'off'}">
+      <div class="ph">
+        <div class="pname">${meta.icon} ${meta.label} ${on?'':'<span class="off-tag">nonaktif</span>'}</div>
+      </div>
+      <div class="pval mono">${fmtInt(cur)}</div>
+      <div class="pshare">${on? share.toFixed(0)+'% dari total aktif' : 'tidak disertakan dalam skor'}</div>
+      ${sparkline(normSeries, on? cssVar('--accent') : cssVar('--text-muted'))}
+    </div>`;
+  }).join('');
+  document.getElementById('platform-tiles').innerHTML = html;
+}
+
+/* ============================================================
+   RENDER: narrative panels
+   ============================================================ */
+function narrativeQuotes(level, keyword){
+  const official = `"Kami memantau perkembangan diskusi terkait ${keyword} dan berkomitmen menindaklanjuti masukan publik secara transparan."`;
+  const publicByLevel = {
+    normal: `Belum ada narasi yang menyimpang signifikan dari pernyataan resmi terkait "${keyword}".`,
+    waspada: `"Mulai ada yang mempertanyakan apakah pernyataan resmi ${keyword} benar-benar sesuai kenyataan di lapangan."`,
+    kritis: `"${keyword} bilang semuanya aman, tapi yang beredar sekarang malah nunjukin mereka nutup-nutupin masalah ini — publik mulai nggak percaya sama pernyataan resminya."`,
+  };
+  return { official, public: publicByLevel[level] };
+}
+
+function renderNarrative(derived){
+  const n = derived.composite.length-1;
+  const level = levelOf(derived.composite[n]);
+  const divScore = Math.round(derived.narr[n]||0);
+  const q = narrativeQuotes(level, STATE.keyword);
+
+  document.getElementById('narr-summary-quote').textContent = q.public;
+  document.getElementById('narr-summary-score').textContent = 'skor divergensi: '+divScore+'/100';
+  document.getElementById('narr-official-quote').textContent = q.official;
+  document.getElementById('narr-public-quote').textContent = q.public;
+  const pill = document.getElementById('narr-public-pill');
+  pill.className = 'pill '+(level==='kritis'?'confirmed':level==='waspada'?'pending':'dismissed');
+  pill.textContent = 'simulasi — level '+levelLabel(level).toLowerCase();
+}
+
+/* ============================================================
+   RENDER: playbook mini (Ringkasan)
+   ============================================================ */
+function renderPlaybookMini(derived){
+  const n = derived.composite.length-1;
+  const level = levelOf(derived.composite[n]);
+  const pb = PLAYBOOK[level];
+  document.getElementById('playbook-mini-lead').innerHTML = pb.lead;
+  document.getElementById('playbook-mini-list').innerHTML = pb.items.slice(0,3).map(li=>`<li>${li}</li>`).join('');
+}
+
+/* ============================================================
+   RENDER: posts (mini list, AI suggestion, full feed)
+   ============================================================ */
+function renderTriggerSuggestionInto(elId, posts){
+  const el = document.getElementById(elId);
+  const sugg = computeTriggerSuggestion(posts);
+  if(sugg){
+    el.innerHTML = `<div class="lbl">💡 Saran AI — kemungkinan pemicu awal</div>
+      <div style="font-size:12.5px;">${PLATFORM_META[sugg.platform].icon} <b>${escapeHtml(sugg.author)}</b> <span class="cred-badge ${sugg.credKey}">${CRED_META[sugg.credKey].label}</span></div>
+      <div class="quote" style="margin-top:8px;">"${escapeHtml(sugg.text)}"</div>
+      <div class="tagrow"><span class="tag">${sugg.timeLabel}</span><span class="tag">engagement ${fmtInt(sugg.engagement)}</span><span class="pill ${CATEGORY_META[sugg.category].cls}">${CATEGORY_META[sugg.category].label}</span></div>
+      <p style="font-size:11px;color:var(--text-muted);margin-top:8px;">Dipilih karena merupakan unggahan bernada negatif paling awal dengan engagement di atas persentil-75 dari seluruh unggahan yang terkumpul sejauh ini.</p>`;
+  } else {
+    el.innerHTML = `<div class="lbl">💡 Saran AI — kemungkinan pemicu awal</div><p style="font-size:12px;color:var(--text-muted);">Belum cukup data untuk menyarankan unggahan pemicu.</p>`;
+  }
+}
+
+function renderPostsMini(posts){
+  const top3 = [...posts].sort((a,b)=>b.engagement-a.engagement).slice(0,3);
+  document.getElementById('posts-mini-list').innerHTML = top3.length ? top3.map(p=>`
+    <div class="post-compact-row">
+      <div>${PLATFORM_META[p.platform].icon} <b>${escapeHtml(p.author)}</b> — ${escapeHtml(p.text)}</div>
+      <div class="mono" style="white-space:nowrap;color:var(--text-muted);">${fmtInt(p.engagement)}</div>
+    </div>`).join('') : `<div style="color:var(--text-muted);font-size:12px;">Belum ada unggahan.</div>`;
+}
+
+function renderPostsFeed(posts){
+  const sorted = [...posts].sort((a,b)=>{
+    if(STATE.postSort==='engagement') return b.engagement-a.engagement;
+    return b.bucketIdx-a.bucketIdx || b.id-a.id;
+  });
+  document.getElementById('posts-feed-empty').style.display = sorted.length? 'none':'block';
+  document.getElementById('posts-feed-table').innerHTML = sorted.map(p=>`
+    <tr>
+      <td class="mono" style="white-space:nowrap;color:var(--text-2);">${p.timeLabel}</td>
+      <td>${PLATFORM_META[p.platform].icon} ${PLATFORM_META[p.platform].label}</td>
+      <td>${escapeHtml(p.author)}<br><span class="cred-badge ${p.credKey}">${CRED_META[p.credKey].label}</span></td>
+      <td style="max-width:360px;">${escapeHtml(p.text)}</td>
+      <td><span class="pill ${CATEGORY_META[p.category].cls}">${CATEGORY_META[p.category].label}</span></td>
+      <td class="mono" style="text-align:right;">${fmtInt(p.engagement)}</td>
+    </tr>`).join('');
+}
+
+function renderPosts(){
+  const posts = flattenPosts();
+  renderPostsMini(posts);
+  renderTriggerSuggestionInto('trigger-suggestion', posts);
+  renderTriggerSuggestionInto('trigger-suggestion-full', posts);
+  renderPostsFeed(posts);
+}
+
+/* ============================================================
+   RENDER: event log + alerts (generated live)
+   ============================================================ */
+function checkForEvents(derived){
+  const n = derived.composite.length;
+  if(n<2) return;
+  const i = n-1;
+  const curLevel = levelOf(derived.composite[i]);
+  const prevLevel = levelOf(derived.composite[i-1]);
+  if(curLevel!==prevLevel){
+    const rank = {normal:0,waspada:1,kritis:2};
+    const dir = rank[curLevel]>rank[prevLevel] ? 'naik' : 'turun';
+    STATE.log.unshift({
+      time: bucketLabel(i,n),
+      title: `Status ${dir} ke ${levelLabel(curLevel)}`,
+      detail: `Skor komposit ${dir} dari ${Math.round(derived.composite[i-1])} menjadi ${Math.round(derived.composite[i])} untuk kata kunci "${STATE.keyword}".`,
+      level: curLevel,
+    });
+    if(STATE.log.length>12) STATE.log.pop();
+  }
+
+  INDICATOR_META.forEach(ind=>{
+    const series = derived[ind.id];
+    const cur = series[i], prev = series[i-1];
+    if(cur>=40 && prev<40){
+      STATE.alertSeq++;
+      STATE.alerts.unshift({
+        id: STATE.alertSeq,
+        time: bucketLabel(i,n),
+        signal: `${ind.name} melewati ambang waspada untuk "${STATE.keyword}" (skor ${Math.round(cur)})`,
+        indicator: ind.name,
+        status: 'pending', statusLabel: 'Menunggu',
+      });
+    }
+  });
+  if(STATE.alerts.length>10){
+    for(let k=STATE.alerts.length-1; k>=0 && STATE.alerts.length>10; k--){
+      if(STATE.alerts[k].status!=='pending') STATE.alerts.splice(k,1);
+    }
+    while(STATE.alerts.length>10) STATE.alerts.pop();
+  }
+}
+
+function renderEventLog(){
+  if(STATE.log.length===0){
+    document.getElementById('event-log').innerHTML = `<div class="card" style="color:var(--text-muted);font-size:12.5px;">Belum ada perubahan level — log akan terisi begitu status eskalasi bergerak.</div>`;
+    return;
+  }
+  const html = STATE.log.map(e=>`<div class="card" style="display:flex;gap:14px;align-items:flex-start;">
+      <span class="badge ${e.level}" style="flex-shrink:0;margin-top:2px;"><span class="dot"></span>${e.time}</span>
+      <div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:3px;">${e.title}</div>
+        <div style="font-size:12.5px;color:var(--text-2);">${e.detail}</div>
+      </div>
+    </div>`).join('');
+  document.getElementById('event-log').innerHTML = html;
+}
+
+function renderAlerts(){
+  const tbody = document.getElementById('alert-table');
+  document.getElementById('alert-empty').style.display = STATE.alerts.length===0 ? 'block':'none';
+  tbody.innerHTML = STATE.alerts.map(a=>rowHtml(a)).join('');
+}
+function rowHtml(a){
+  return `<tr data-id="${a.id}">
+    <td class="mono" style="white-space:nowrap;color:var(--text-2);">${a.time}</td>
+    <td style="max-width:340px;">${a.signal}</td>
+    <td><span class="tag">${a.indicator}</span></td>
+    <td><span class="pill ${a.status}">${a.statusLabel}</span></td>
+    <td>
+      <div class="btn-row">
+        <button class="btn primary" ${a.status!=='pending'?'disabled':''} onclick="setAlert(${a.id},'confirmed','Terkonfirmasi')">Konfirmasi</button>
+        <button class="btn ghost" ${a.status!=='pending'?'disabled':''} onclick="setAlert(${a.id},'dismissed','False Positive')">Tandai FP</button>
+      </div>
+    </td>
+  </tr>`;
+}
+function setAlert(id, status, label){
+  const a = STATE.alerts.find(x=>x.id===id);
+  if(a){ a.status = status; a.statusLabel = label; }
+  renderAlerts();
+  document.getElementById('kpi-pending').textContent = STATE.alerts.filter(x=>x.status==='pending').length;
+}
+window.setAlert = setAlert;
+
+/* ============================================================
+   RENDER: roadmap (static content)
+   ============================================================ */
+function renderRoadmap(){
+  const html = ROADMAP.map(cat=>{
+    const items = cat.items.map(it=>`
+      <div class="idea">
+        <div class="t">${it.t}</div>
+        <div class="d">${it.d}</div>
+        <div class="gap"><b>Merespons:</b> ${it.gap}</div>
+      </div>`).join('');
+    return `<div class="roadmap-cat"><h4>${cat.cat}</h4><div class="grid roadmap-grid">${items}</div></div>`;
+  }).join('');
+  document.getElementById('roadmap-content').innerHTML = html;
+}
+
+/* ============================================================
+   MASTER RENDER + TICK LOOP
+   ============================================================ */
+function renderAll(){
+  const derived = computeDerived();
+  renderMainChart(derived);
+  renderTimelineChart(derived);
+  renderNarrativeChart(derived);
+  renderIndicatorMini(derived);
+  renderIndicatorCards(derived);
+  renderPlatformTiles();
+  renderPosts();
+  renderNarrative(derived);
+  renderPlaybookMini(derived);
+  renderKPIs(derived);
+  renderEventLog();
+  renderAlerts();
+}
+
+function tick(){
+  generateNextBucket();
+  const derived = computeDerived();
+  checkForEvents(derived);
+  renderAll();
+}
+
+function setLivePillRunning(on){
+  const pill = document.getElementById('live-pill');
+  const text = document.getElementById('live-pill-text');
+  pill.classList.toggle('paused', !on);
+  text.textContent = on ? `Live — memantau "${STATE.keyword}"` : 'Dijeda';
+}
+
+function startMonitoring(keyword){
+  if(STATE.timer) clearInterval(STATE.timer);
+  initSession(keyword);
+  const initial = computeDerived();
+  seedHistoryLog(initial);
+  renderAll();
+  STATE.running = true;
+  setLivePillRunning(true);
+  STATE.timer = setInterval(tick, TICK_MS);
+}
+
+function seedHistoryLog(derived){
+  for(let i=1;i<derived.composite.length;i++){
+    const curLevel = levelOf(derived.composite[i]);
+    const prevLevel = levelOf(derived.composite[i-1]);
+    if(curLevel!==prevLevel){
+      const rank={normal:0,waspada:1,kritis:2};
+      const dir = rank[curLevel]>rank[prevLevel]?'naik':'turun';
+      STATE.log.unshift({ time:bucketLabel(i,derived.composite.length), title:`Status ${dir} ke ${levelLabel(curLevel)}`,
+        detail:`Skor komposit ${dir} dari ${Math.round(derived.composite[i-1])} menjadi ${Math.round(derived.composite[i])} untuk kata kunci "${STATE.keyword}".`, level:curLevel });
+    }
+    INDICATOR_META.forEach(ind=>{
+      const s = derived[ind.id];
+      if(s[i]>=40 && s[i-1]<40){
+        STATE.alertSeq++;
+        STATE.alerts.unshift({ id:STATE.alertSeq, time:bucketLabel(i,derived.composite.length),
+          signal:`${ind.name} melewati ambang waspada untuk "${STATE.keyword}" (skor ${Math.round(s[i])})`,
+          indicator:ind.name, status:'pending', statusLabel:'Menunggu' });
+      }
+    });
+  }
+  if(STATE.log.length>12) STATE.log.length = 12;
+  if(STATE.alerts.length>10) STATE.alerts.length = 10;
+}
+
+/* ============================================================
+   UI WIRING
+   ============================================================ */
+document.querySelectorAll('.nav-item').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+  });
+});
+
+document.querySelectorAll('.chip-toggle').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    const p = chip.dataset.platform;
+    STATE.platforms[p] = !STATE.platforms[p];
+    chip.classList.toggle('on', STATE.platforms[p]);
+    if(STATE.buckets.length) renderAll();
+  });
+});
+
+document.querySelectorAll('.sort-toggle button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    STATE.postSort = btn.dataset.sort;
+    document.querySelectorAll('.sort-toggle button').forEach(b=>b.classList.toggle('on', b===btn));
+    renderPosts();
+  });
+});
+
+document.getElementById('start-btn').addEventListener('click', ()=>{
+  const kw = document.getElementById('keyword-input').value.trim() || 'Brand Anda';
+  startMonitoring(kw);
+});
+document.getElementById('keyword-input').addEventListener('keydown', (e)=>{
+  if(e.key==='Enter') document.getElementById('start-btn').click();
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+renderRoadmap();
+startMonitoring(document.getElementById('keyword-input').value);
+window.addEventListener('resize', ()=>{ if(STATE.buckets.length) renderAll(); });
+</script>
+</body>
+</html>
